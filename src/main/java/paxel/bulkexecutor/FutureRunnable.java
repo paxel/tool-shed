@@ -23,6 +23,10 @@ public class FutureRunnable implements Runnable {
         this.future = future;
     }
 
+    /**
+     * This runs the wrapped runnable and updates the future.
+     */
+    @Override
     public void run() {
         try {
             runnable.run();

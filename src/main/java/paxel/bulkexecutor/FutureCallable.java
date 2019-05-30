@@ -5,6 +5,8 @@ import java.util.concurrent.CompletableFuture;
 
 /**
  * A Runnable that will complete the given future on completion.
+ *
+ * @param <V> the result type of the Callable.
  */
 public class FutureCallable<V> implements Runnable {
 
@@ -26,8 +28,9 @@ public class FutureCallable<V> implements Runnable {
     }
 
     /**
-     * We provide the result
+     * This runs the wrapped callable and updates the future.
      */
+    @Override
     public void run() {
         try {
             V call = callable.call();
