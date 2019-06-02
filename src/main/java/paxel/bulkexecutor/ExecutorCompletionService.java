@@ -7,11 +7,11 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 
 /**
- * This is a simple CompletionService that combines Callables and Runnables with
- * CompleteableFutures. after submitting, the resulting future can be used to
- * chain actions depending on the execution result. If the chained actions are
- * executed by the caller or the executer is completely depending on when the
- * execution finishes.
+ * This is a simple CompletionService that combines {@link Callable}s and
+ * {@link Runnable}s with CompleteableFutures. after submitting, the resulting
+ * future can be used to chain actions depending on the execution result. If the
+ * chained actions are executed by the caller or the executer is completely
+ * depending on when the execution finishes.
  */
 public class ExecutorCompletionService {
 
