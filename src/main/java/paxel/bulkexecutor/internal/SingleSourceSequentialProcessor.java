@@ -43,7 +43,7 @@ public class SingleSourceSequentialProcessor implements SequentialProcessor {
                         status = Status.ACTIVE;
                         CompletableFuture<Void> future = new CompletableFuture<>();
                         executorService.submit(new FutureRunnable(queueRunner, future));
-                        future.thenAccept(this::finished);
+                        future.handle(this::finished);
                     }
                 } finally {
                     lock.unlock();
@@ -58,7 +58,11 @@ public class SingleSourceSequentialProcessor implements SequentialProcessor {
         return blockingQueue.size();
     }
 
-    private void finished(Void f) {
+    private Void finished(Void ignorable, Throwable ex) {
+
+        if (ex != null) {
+            // TODO: errorhandler
+        }
         // the job has finished.
         if (blockingQueue.isEmpty()) {
             // this path is critically
@@ -69,7 +73,7 @@ public class SingleSourceSequentialProcessor implements SequentialProcessor {
                 if (blockingQueue.isEmpty()) {
                     // all jobs done. wait for another job
                     status = Status.IDLE;
-                    return;
+                    return null;
                 }
             } finally {
                 lock.unlock();
@@ -78,7 +82,8 @@ public class SingleSourceSequentialProcessor implements SequentialProcessor {
         // The queue is not empty, and if the runner will finish immediately
         CompletableFuture<Void> future = new CompletableFuture<>();
         executorService.submit(new FutureRunnable(queueRunner, future));
-        future.thenAccept(this::finished);
+        future.handle(this::finished);
+        return null;
     }
 
     private static enum Status {
