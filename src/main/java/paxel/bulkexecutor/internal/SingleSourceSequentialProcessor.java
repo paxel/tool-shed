@@ -3,16 +3,18 @@ package paxel.bulkexecutor.internal;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.locks.ReentrantLock;
 import paxel.bulkexecutor.FutureRunnable;
 import paxel.bulkexecutor.SequentialProcessor;
 
 public class SingleSourceSequentialProcessor implements SequentialProcessor {
 
+    private static final int IDLE = 0;
+    private static final int QUEUED = 1;
+    private static final int FINISHED = 2;
     private final LinkedBlockingQueue<Runnable> blockingQueue;
     private final ExecutorService executorService;
-    private volatile Status status = Status.IDLE;
-    private ReentrantLock lock = new ReentrantLock();
+    private volatile int runStatus;
+    private volatile int added;
     private QueueRunner queueRunner;
 
     public SingleSourceSequentialProcessor(ExecutorService executorService) {
@@ -31,23 +33,21 @@ public class SingleSourceSequentialProcessor implements SequentialProcessor {
         // only one thread calls this add, so we don't have to check for that
         final boolean offer = blockingQueue.offer(r);
         if (offer) {
-            if (status == Status.IDLE) {
-                // we have to activate this again
-                // this path is critial!
-                // there is the posibilityy that the last job just checked the queue and set the status to active.
-                // so to be on the save side we take a lock and check again.
-                // we must not submit the same runner concurrently!
-                lock.lock();
-                try {
-                    if (status == Status.IDLE) {
-                        status = Status.ACTIVE;
-                        CompletableFuture<Void> future = new CompletableFuture<>();
-                        executorService.submit(new FutureRunnable(queueRunner, future));
-                        future.handle(this::finished);
-                    }
-                } finally {
-                    lock.unlock();
+            // added is the number of added runnables (until overflow but we only check for equal, not bigger than) 
+            added += 1;
+            for (;;) {
+                if (runStatus == IDLE) {
+                    // this thing is not added. the add method is the only one to add it, so it's save to add
+                    runStatus = 1;
+                    CompletableFuture<Void> future = new CompletableFuture<>();
+                    executorService.submit(new FutureRunnable(queueRunner, future));
+                    future.handle((a, b) -> finished(a, b, added));
+                    break;
+                } else if (runStatus == QUEUED) {
+                    // its currently queued, it will enqueue itself later
+                    break;
                 }
+                // else: it's currently finished. it will either queue or idle soon 
             }
         }
         return offer;
@@ -58,36 +58,22 @@ public class SingleSourceSequentialProcessor implements SequentialProcessor {
         return blockingQueue.size();
     }
 
-    private Void finished(Void ignorable, Throwable ex) {
-
+    private Void finished(Void ignorable, Throwable ex, int myAdd) {
+        runStatus = FINISHED;
         if (ex != null) {
             // TODO: errorhandler
         }
-        // the job has finished.
-        if (blockingQueue.isEmpty()) {
-            // this path is critically
-            // maybe the add just added a queue and checked if we are still active
-            // to be safe we take the lock and check if the queue is really empty
-            lock.lock();
-            try {
-                if (blockingQueue.isEmpty()) {
-                    // all jobs done. wait for another job
-                    status = Status.IDLE;
-                    return null;
-                }
-            } finally {
-                lock.unlock();
-            }
+        // the job has finished. if inbetween something was added, we have to enqueue. or if there is something in the queue.
+        if (myAdd != added || !blockingQueue.isEmpty()) {
+            runStatus = QUEUED;
+            // The queue is not empty, and if the runner will finish immediately
+            CompletableFuture<Void> future = new CompletableFuture<>();
+            executorService.submit(new FutureRunnable(queueRunner, future));
+            future.handle((a, b) -> finished(a, b, this.added));
+        } else {
+            // queue
+            this.runStatus = IDLE;
         }
-        // The queue is not empty, and if the runner will finish immediately
-        CompletableFuture<Void> future = new CompletableFuture<>();
-        executorService.submit(new FutureRunnable(queueRunner, future));
-        future.handle(this::finished);
         return null;
     }
-
-    private static enum Status {
-        IDLE, ACTIVE
-    }
-
 }
