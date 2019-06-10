@@ -5,7 +5,7 @@
 
     <groupId>io.github.paxel</groupId>
     <artifactId>group-executor</artifactId>
-    <version>1.1-SNAPSHOT</version>
+    <version>0.9-alpha2-SNAPSHOT</version>
 
     <name>group-executor</name>
 
