@@ -4,11 +4,26 @@ import paxel.bulkexecutor.internal.SingleSourceSequentialProcessor;
 import java.util.concurrent.ExecutorService;
 import paxel.bulkexecutor.internal.MultiSourceSequentialProcessor;
 
-public class GroupExecutor {
+/**
+ * The Grouping Executor provides SequentialProcessors that process Runnables
+ * sequentially per Processor. A Processor that never receives Runnables, will
+ * never be executed, thus it is safe to create many Processors without wasting
+ * too many resources. A typical use case would be an Actor System, where every
+ * actor has one Processor. The actor lets the Processor execute the actors
+ * actions and it is guaranteed, that no two processes of this actor run
+ * parallel.
+ *
+ */
+public class GroupingExecutor {
 
+    private final ErrorHandler DEFAULT = x -> true;
     private final ExecutorService executorService;
 
-    public GroupExecutor(ExecutorService executorService) {
+    /**
+     * Constructs the Grouping Executor with an Executor service that defines how many {@link SequentialProcessors} are concurrently active.
+     * @param executorService 
+     */
+    public GroupingExecutor(ExecutorService executorService) {
         this.executorService = executorService;
     }
 
@@ -18,7 +33,7 @@ public class GroupExecutor {
      * @return the SequentialProcessor.
      */
     public SequentialProcessor createSingleSourceSequentialProcessor() {
-        return new SingleSourceSequentialProcessor(executorService);
+        return new SingleSourceSequentialProcessor(executorService, DEFAULT);
     }
 
     /**
@@ -30,7 +45,7 @@ public class GroupExecutor {
      * @return the SequentialProcessor.
      */
     public SequentialProcessor createSingleSourceBoundedSequentialProcessor(int limit) {
-        return new SingleSourceSequentialProcessor(executorService, limit);
+        return new SingleSourceSequentialProcessor(executorService, DEFAULT, limit);
     }
 
     /**
@@ -40,7 +55,7 @@ public class GroupExecutor {
      * @return the SequentialProcessor.
      */
     public SequentialProcessor createMultiSourceSequentialProcessor() {
-        return new MultiSourceSequentialProcessor(executorService);
+        return new MultiSourceSequentialProcessor(executorService, DEFAULT);
     }
 
     /**
@@ -53,6 +68,6 @@ public class GroupExecutor {
      * @return the SequentialProcessor.
      */
     public SequentialProcessor createMultiSourceBoundedSequentialProcessor(int limit) {
-        return new MultiSourceSequentialProcessor(executorService, limit);
+        return new MultiSourceSequentialProcessor(executorService, DEFAULT, limit);
     }
 }

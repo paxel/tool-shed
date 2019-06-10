@@ -8,10 +8,8 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * This is a simple CompletionService that combines {@link Callable}s and
- * {@link Runnable}s with CompleteableFutures. after submitting, the resulting
- * future can be used to chain actions depending on the execution result. If the
- * chained actions are executed by the caller or the executer is completely
- * depending on when the execution finishes.
+ * {@link Runnable}s with CompleteableFutures. After submitting, the resulting
+ * future can be used to chain actions depending on the execution result.
  */
 public class ExecutorCompletionService {
 
@@ -43,20 +41,20 @@ public class ExecutorCompletionService {
 
     public <T> CompletableFuture<T> submit(Callable<T> task) {
         CompletableFuture<T> completableFuture = new CompletableFuture<>();
-        ex.submit(new FutureCallable(task, completableFuture));
+        ex.submit(new CallableCompleter(task, completableFuture));
         return completableFuture;
     }
 
     public <T> CompletableFuture<T> submit(Runnable task, T result) {
         CompletableFuture<Void> completableFuture = new CompletableFuture<>();
-        ex.submit(new FutureRunnable(task, completableFuture));
+        ex.submit(new RunnableCompleter(task, completableFuture));
         // if successfull, change the result
         return completableFuture.thenApply(f -> result);
     }
 
     public CompletableFuture<Void> submit(Runnable task) {
         CompletableFuture<Void> completableFuture = new CompletableFuture<>();
-        ex.submit(new FutureRunnable(task, completableFuture));
+        ex.submit(new RunnableCompleter(task, completableFuture));
         // if successfull, change the result
         return completableFuture;
     }

@@ -2,17 +2,18 @@ package paxel.bulkexecutor.internal;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.locks.ReentrantLock;
+import paxel.bulkexecutor.ErrorHandler;
 
 public class MultiSourceSequentialProcessor extends SingleSourceSequentialProcessor {
 
     private final ReentrantLock in = new ReentrantLock();
 
-    public MultiSourceSequentialProcessor(ExecutorService executorService) {
-        super(executorService);
+    public MultiSourceSequentialProcessor(ExecutorService executorService, ErrorHandler errorHandler) {
+        super(executorService, errorHandler);
     }
 
-    public MultiSourceSequentialProcessor(ExecutorService executorService, int limit) {
-        super(executorService, limit);
+    public MultiSourceSequentialProcessor(ExecutorService executorService, ErrorHandler errorHandler, int limit) {
+        super(executorService, errorHandler, limit);
     }
 
     @Override

@@ -82,7 +82,7 @@ public class JmhActorBasedSumTest {
     public static class DataProvider2 {
 
         private ExecutorService exe;
-        private GroupExecutor g;
+        private GroupingExecutor g;
         private Actor1 a1;
         private Actor2 a2;
         private Actor3 a3;
@@ -91,7 +91,7 @@ public class JmhActorBasedSumTest {
         @Setup(Level.Invocation)
         public void init() {
             exe = Executors.newFixedThreadPool(2);
-            g = new GroupExecutor(exe);
+            g = new GroupingExecutor(exe);
             latch = new CountDownLatch(2);
             a1 = new Actor1(g.createMultiSourceSequentialProcessor(), latch);
             a2 = new Actor2(g.createSingleSourceSequentialProcessor(), a1);
@@ -104,7 +104,7 @@ public class JmhActorBasedSumTest {
     public static class DataProvider1 {
 
         private ExecutorService exe;
-        private GroupExecutor g;
+        private GroupingExecutor g;
         private Actor1 a1;
         private Actor2 a2;
         private Actor3 a3;
@@ -113,7 +113,7 @@ public class JmhActorBasedSumTest {
         @Setup(Level.Invocation)
         public void init() {
             exe = Executors.newFixedThreadPool(1);
-            g = new GroupExecutor(exe);
+            g = new GroupingExecutor(exe);
             latch = new CountDownLatch(2);
             a1 = new Actor1(g.createMultiSourceSequentialProcessor(), latch);
             a2 = new Actor2(g.createSingleSourceSequentialProcessor(), a1);

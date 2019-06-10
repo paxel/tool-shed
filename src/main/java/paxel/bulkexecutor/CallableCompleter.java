@@ -4,11 +4,12 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
 
 /**
- * A Runnable that will complete the given future on completion.
+ * A Runnable that will complete the given future on completion of the given
+ * Callable.
  *
  * @param <V> the result type of the Callable.
  */
-public class FutureCallable<V> implements Runnable {
+public class CallableCompleter<V> implements Runnable {
 
     private final Callable<V> callable;
 
@@ -16,13 +17,12 @@ public class FutureCallable<V> implements Runnable {
 
     /**
      * Creates an instance of Runnable that combines the given Callable with the
-     * given future. The given future will be executed if this is instance is
-     * run.
+     * given future.
      *
      * @param callable The wrapped callable.
      * @param future The future that will be notified of the result.
      */
-    public FutureCallable(Callable<V> callable, CompletableFuture<V> future) {
+    public CallableCompleter(Callable<V> callable, CompletableFuture<V> future) {
         this.callable = callable;
         this.future = future;
     }

@@ -3,22 +3,22 @@ package paxel.bulkexecutor;
 import java.util.concurrent.CompletableFuture;
 
 /**
- * A Runnable that will complete the given future on completion.
+ * A Runnable that will complete the given future on completion of the given
+ * runnable.
  */
-public class FutureRunnable implements Runnable {
+public class RunnableCompleter implements Runnable {
 
     private final CompletableFuture<Void> future;
     private final Runnable runnable;
 
     /**
      * Creates an instance of Runnable that combines the given Runnable with the
-     * given future. The given future will be executed if this is instance is
-     * run.
+     * given future.
      *
      * @param runnable The wrapped runnable.
      * @param future The future that will be notified of the result.
      */
-    public FutureRunnable(Runnable runnable, CompletableFuture<Void> future) {
+    public RunnableCompleter(Runnable runnable, CompletableFuture<Void> future) {
         this.runnable = runnable;
         this.future = future;
     }
