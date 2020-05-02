@@ -4,7 +4,6 @@ import paxel.bulkexecutor.ErrorHandler;
 import java.util.Queue;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentLinkedDeque;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import paxel.bulkexecutor.RunnableCompleter;

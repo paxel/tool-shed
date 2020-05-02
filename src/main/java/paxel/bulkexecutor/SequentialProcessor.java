@@ -4,6 +4,15 @@ package paxel.bulkexecutor;
  * The Sequential Processor will process all given Runnables sequentially. After
  * all Runnables are processed, the Processor will become idle until a new
  * Runnable is added.
+ *
+ * This works basically like this: The SequentialProcessor enqueues a job to a
+ * central Executor, as soon as it gets a Runnable added. When more runnables
+ * are added, they go to a queue, if there is already a job active. When the job
+ * finishes, it checks if there are more runnables, and the limit is not
+ * reached, and processes them immediately. Otherwise it creates a new job, and
+ * enqueues it to the central executor, giving possible other Processors
+ * processing time. If there are no Runnables, the processor does not use any
+ * CPU cycles.
  */
 public interface SequentialProcessor {
 
