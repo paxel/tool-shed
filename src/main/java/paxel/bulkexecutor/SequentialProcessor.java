@@ -52,7 +52,7 @@ public interface SequentialProcessor {
     /**
      * The processor has currently no Runnables to execute.
      *
-     * @return
+     * @return {@code true} if idle.
      */
     boolean isIdle();
 }

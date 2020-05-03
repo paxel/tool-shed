@@ -20,8 +20,10 @@ public class GroupingExecutor {
     private final ExecutorService executorService;
 
     /**
-     * Constructs the Grouping Executor with an Executor service that defines how many {@link SequentialProcessors} are concurrently active.
-     * @param executorService 
+     * Constructs the Grouping Executor with an Executor service that defines
+     * how many {@link SequentialProcessor} are concurrently active.
+     *
+     * @param executorService The used executor
      */
     public GroupingExecutor(ExecutorService executorService) {
         this.executorService = executorService;

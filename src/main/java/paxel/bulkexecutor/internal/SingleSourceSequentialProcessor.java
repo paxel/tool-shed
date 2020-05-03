@@ -48,6 +48,7 @@ public class SingleSourceSequentialProcessor implements SequentialProcessor {
      * @param executorService The executor that runs the {@link Runnable}s.
      * @param errorHandler the handler that decides if the Processor continues
      * in case a Runnable failed.
+     * @param limit The limit of the input queue.
      */
     public SingleSourceSequentialProcessor(ExecutorService executorService, ErrorHandler errorHandler, int limit) {
         queue = new LinkedBlockingQueue(limit);
