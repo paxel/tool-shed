@@ -28,6 +28,7 @@ youngBunny.addRunnable(()->yb.cleanFur())
 maleBunny.addRunnable(()->mb.search(yb))
 
 ```
+Of course it makes way more sense to have the SequentialProcessor inside of an instance of bunny and delegate all the action of that instance to the processor. If done correctly, the bunny instance becomes completely threadsafe, because the commands are all executed one after another.
 
 
 Another feature this package provides is the ExecutorCompletionService, that converts the lame Futures of the Executor framework to the mighty CompletionFutures.
@@ -40,3 +41,6 @@ completionService.submit(() -> doSomething())
   // if the process was successful, also do this:
   .thenAccept(s -> System.out.println("Result was "+s))));
 ```
+
+
+To use this small lib you can simply depend it: https://mvnrepository.com/artifact/io.github.paxel/group-executor/0.9.4
