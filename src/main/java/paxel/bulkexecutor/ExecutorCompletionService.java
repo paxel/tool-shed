@@ -55,7 +55,6 @@ public class ExecutorCompletionService {
     public CompletableFuture<Void> submit(Runnable task) {
         CompletableFuture<Void> completableFuture = new CompletableFuture<>();
         ex.submit(new RunnableCompleter(task, completableFuture));
-        // if successfull, change the result
         return completableFuture;
     }
 }
