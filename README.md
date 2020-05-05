@@ -27,6 +27,75 @@ maleBunny.addRunnable(()->mb.search(yb))
 ```
 Of course it makes way more sense to have the SequentialProcessor inside of an instance of bunny and delegate all the action of that instance to the processor. If done correctly, the bunny instance becomes completely threadsafe, because the commands are all executed one after another.
 
+```java
+public class Bunny {
+
+    private final SequentialProcessor processor;
+
+    // never used by another thread than the SequentialProcessor
+    private int x;
+
+    public Bunny(SequentialProcessor processor) {
+        this.processor = processor;
+    }
+
+    public void hopUp() {
+        processor.add(() -> incX(1));
+    }
+
+    public void hopDown() {
+        processor.add(() -> incX(-1));
+    }
+
+    private void incX(int diff) {
+        x += diff;
+    }
+
+}
+```
+*FAQ:*
+
+Q: Why use this anyway? I can just use a single Threaded Executor in the Bunny.
+A: Yes, but if you have 1_000_000 Bunnies, you peak at 1 mio Threads. Good bye.
+
+Q: Well I could use a limited ExecutorService and limit it to 20.
+A: Yes, but then one bunny is hopping simultaneously up and down. Good bye.
+
+Q: I can not get the value x out of the bunny.
+A: wrong. check that:
+
+```java
+   public void askX(IntConsumer bigJimmy) {
+        processor.add(() -> bigJimmy.accept(this::currentX()));
+    }
+
+    private int currentX(){
+        return x;
+    }
+```
+
+you will receive the value of x that it will have logically after processing all hops, that it was asked to do before.
+
+Q: well thats not very comfortable.
+A: just use a CompletableFuture instead an IntConsumer and you can react to the value immediately
+
+```java
+   public CompletableFuture<Integer> askX() {
+        CompletableFuture<Integer> bigJimmy = new CompletableFuture();
+        processor.add(() -> bigJimmy.complete(this::currentX()));
+        return bigJimmy;
+    }
+
+
+...
+
+     // ask for value and go that much back
+     bunny.askX().thenApply(r->bunny.sniffle(r));
+
+
+```
+
+
 This is not expected to be the most performant solution. But it should be fairly simple to use.
 
 # ExecutorCompletionService
