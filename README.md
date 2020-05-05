@@ -55,18 +55,18 @@ public class Bunny {
 ```
 *FAQ:*
 
-Q: Why use this anyway? I can just use a single Threaded Executor in the Bunny.
+Q: Why use this anyway? I can just use a single Threaded Executor in the Bunny.   
 A: Yes, but if you have 1_000_000 Bunnies, you peak at 1 mio Threads. Good bye.
 
-Q: Well I could use a limited ExecutorService and limit it to 20.
+Q: Well I could use a limited ExecutorService and limit it to 20.   
 A: Yes, but then one bunny is hopping simultaneously up and down. Good bye.
 
-Q: I can not get the value x out of the bunny.
+Q: I can not get the value x out of the bunny.   
 A: wrong. check that:
 
 ```java
    public void askX(IntConsumer bigJimmy) {
-        processor.add(() -> bigJimmy.accept(this::currentX()));
+        processor.add(() -> bigJimmy.accept(currentX()));
     }
 
     private int currentX(){
@@ -76,21 +76,21 @@ A: wrong. check that:
 
 you will receive the value of x that it will have logically after processing all hops, that it was asked to do before.
 
-Q: well thats not very comfortable.
+Q: well thats not very comfortable.   
 A: just use a CompletableFuture instead an IntConsumer and you can react to the value immediately
 
 ```java
    public CompletableFuture<Integer> askX() {
         CompletableFuture<Integer> bigJimmy = new CompletableFuture();
-        processor.add(() -> bigJimmy.complete(this::currentX()));
+        processor.add(() -> bigJimmy.complete(currentX()));
         return bigJimmy;
     }
 
 
 ...
 
-     // ask for value and go that much back
-     bunny.askX().thenApply(r->bunny.sniffle(r));
+     // ask for value and poop the x
+     bunny.askX().thenApply(r->bunny.poop(r));
 
 
 ```
