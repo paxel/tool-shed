@@ -90,7 +90,7 @@ A: just use a CompletableFuture instead an IntConsumer and you can react to the 
 ...
 
      // ask for value and poop the x
-     bunny.askX().thenApply(r->bunny.poop(r));
+     bunny.askX().thenAccept(r->bunny.poop(r));
 
 
 ```
