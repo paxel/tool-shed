@@ -1,24 +1,17 @@
 package paxel.bulkexecutor;
 
+import org.junit.Test;
+import org.openjdk.jmh.annotations.*;
+import org.openjdk.jmh.runner.Runner;
+import org.openjdk.jmh.runner.RunnerException;
+import org.openjdk.jmh.runner.options.Options;
+import org.openjdk.jmh.runner.options.OptionsBuilder;
+
 import java.util.Random;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
-import org.junit.Test;
-import org.openjdk.jmh.annotations.Benchmark;
-import org.openjdk.jmh.annotations.Fork;
-import org.openjdk.jmh.annotations.Level;
-import org.openjdk.jmh.annotations.Measurement;
-import org.openjdk.jmh.annotations.OutputTimeUnit;
-import org.openjdk.jmh.annotations.Scope;
-import org.openjdk.jmh.annotations.Setup;
-import org.openjdk.jmh.annotations.State;
-import org.openjdk.jmh.annotations.Warmup;
-import org.openjdk.jmh.runner.Runner;
-import org.openjdk.jmh.runner.RunnerException;
-import org.openjdk.jmh.runner.options.Options;
-import org.openjdk.jmh.runner.options.OptionsBuilder;
 
 // only fork 1 JVM per benchmark
 @Fork(1)
@@ -31,51 +24,45 @@ import org.openjdk.jmh.runner.options.OptionsBuilder;
 public class JmhActorBasedSumTest {
 
     @Benchmark
-    public void runTwoThreads(DataProvider2 prov) throws InterruptedException {
-        for (int i = 0; i < 100; i++) {
-            prov.a3.tell(23);
-            prov.a2.tell(12);
-            prov.a2.tell(23);
-            prov.a2.tell(12);
-            prov.a2.tell(23);
-            prov.a3.tell(12);
-            prov.a3.tell(22);
-            prov.a3.tell(42);
-            prov.a3.tell(62);
-        }
-        final ShutDown shutDown = new ShutDown();
-        prov.a3.tell(shutDown);
-        prov.a2.tell(shutDown);
-        prov.latch.await();
-        if (prov.a1.getResult() != 11316) {
-            throw new IllegalStateException("Expected 11316 but got " + prov.a1.getResult());
-        }
-        prov.exe.shutdown();
-        prov.exe.awaitTermination(1, TimeUnit.DAYS);
+    public void runOneThread(DataProvider1 prov) throws InterruptedException {
+        testIt(prov.a1, prov.a2, prov.a3, prov.latch, prov.exe);
     }
 
     @Benchmark
-    public void runOneThread(DataProvider1 prov) throws InterruptedException {
+    public void runTwoThreads(DataProvider2 prov) throws InterruptedException {
+        testIt(prov.a1, prov.a2, prov.a3, prov.latch, prov.exe);
+    }
+
+    @Benchmark
+    public void runThreeThreads(DataProvider3 prov) throws InterruptedException {
+        testIt(prov.a1, prov.a2, prov.a3, prov.latch, prov.exe);
+    }
+
+    private void addAllValues(Actor3 a3, Actor2 a2) {
         for (int i = 0; i < 100; i++) {
-            prov.a3.tell(23);
-            prov.a2.tell(12);
-            prov.a2.tell(23);
-            prov.a2.tell(12);
-            prov.a2.tell(23);
-            prov.a3.tell(12);
-            prov.a3.tell(22);
-            prov.a3.tell(42);
-            prov.a3.tell(62);
+            a3.tell(23);
+            a2.tell(12);
+            a2.tell(23);
+            a2.tell(12);
+            a2.tell(23);
+            a3.tell(12);
+            a3.tell(22);
+            a3.tell(42);
+            a3.tell(62);
         }
+    }
+
+    private void testIt(Actor1 a1, Actor2 a2, Actor3 a3, CountDownLatch latch, ExecutorService exe) throws InterruptedException {
+        addAllValues(a3, a2);
         final ShutDown shutDown = new ShutDown();
-        prov.a3.tell(shutDown);
-        prov.a2.tell(shutDown);
-        prov.latch.await();
-        if (prov.a1.getResult() != 11316) {
-            throw new IllegalStateException("Expected 11316 but got " + prov.a1.getResult());
+        a3.tell(shutDown);
+        a2.tell(shutDown);
+        latch.await();
+        if (a1.getResult() != 11316) {
+            throw new IllegalStateException("Expected 11316 but got " + a1.getResult());
         }
-        prov.exe.shutdown();
-        prov.exe.awaitTermination(1, TimeUnit.DAYS);
+        exe.shutdown();
+        exe.awaitTermination(1, TimeUnit.DAYS);
     }
 
     @State(Scope.Benchmark)
@@ -91,6 +78,28 @@ public class JmhActorBasedSumTest {
         @Setup(Level.Invocation)
         public void init() {
             exe = Executors.newFixedThreadPool(2);
+            g = new GroupingExecutor(exe);
+            latch = new CountDownLatch(2);
+            a1 = new Actor1(g.createMultiSourceSequentialProcessor(), latch);
+            a2 = new Actor2(g.createSingleSourceSequentialProcessor(), a1);
+            a3 = new Actor3(g.createSingleSourceSequentialProcessor(), a1);
+        }
+
+    }
+
+    @State(Scope.Benchmark)
+    public static class DataProvider3 {
+
+        private ExecutorService exe;
+        private GroupingExecutor g;
+        private Actor1 a1;
+        private Actor2 a2;
+        private Actor3 a3;
+        private CountDownLatch latch;
+
+        @Setup(Level.Invocation)
+        public void init() {
+            exe = Executors.newFixedThreadPool(3);
             g = new GroupingExecutor(exe);
             latch = new CountDownLatch(2);
             a1 = new Actor1(g.createMultiSourceSequentialProcessor(), latch);
@@ -140,9 +149,9 @@ public class JmhActorBasedSumTest {
             });
         }
 
-        public void tell(Integer a) {
+        public void tell(byte[] a) {
             createSingleSourceSequentialProcessor.add(() -> {
-                result += a;
+                result += a.length;
             });
         }
 
@@ -164,9 +173,15 @@ public class JmhActorBasedSumTest {
         }
 
         public void tell(Integer a) {
+            int size = r.nextInt(a);
+            byte[] bytes = new byte[size];
             createSingleSourceSequentialProcessor.add(() -> {
-
-                a1.tell(r.nextInt(a));
+                try {
+                    Thread.sleep(1, 300);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                a1.tell(bytes);
             });
         }
 
@@ -183,14 +198,24 @@ public class JmhActorBasedSumTest {
         private final Actor1 a1;
         Random r = new Random(1000);
 
+
         private Actor3(SequentialProcessor createSingleSourceSequentialProcessor, Actor1 a1) {
             this.createSingleSourceSequentialProcessor = createSingleSourceSequentialProcessor;
             this.a1 = a1;
         }
 
+        private String result;
+
         public void tell(Integer a) {
+            int size = r.nextInt(a);
+            byte[] bytes = new byte[size];
             createSingleSourceSequentialProcessor.add(() -> {
-                a1.tell(r.nextInt(a));
+                try {
+                    Thread.sleep(0, 40);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                a1.tell(bytes);
             });
         }
 
@@ -213,6 +238,14 @@ public class JmhActorBasedSumTest {
 
         public ShutDown() {
         }
+
+    }
+
+    @Test
+    public void testOneThread() throws InterruptedException {
+        DataProvider1 dataProvider = new DataProvider1();
+        dataProvider.init();
+        this.runOneThread(dataProvider);
     }
 
     @Test
@@ -223,9 +256,9 @@ public class JmhActorBasedSumTest {
     }
 
     @Test
-    public void testOneThread() throws InterruptedException {
-        DataProvider1 dataProvider = new DataProvider1();
+    public void testThreeThreads() throws InterruptedException {
+        DataProvider3 dataProvider = new DataProvider3();
         dataProvider.init();
-        this.runOneThread(dataProvider);
+        this.runThreeThreads(dataProvider);
     }
 }
