@@ -24,17 +24,22 @@ import java.util.concurrent.TimeUnit;
 public class JmhActorBasedSumTest {
 
     @Benchmark
-    public void runOneThread(DataProvider1 prov) throws InterruptedException {
+    public void runOneThreadSingleSourceActors(DataProvider1 prov) throws InterruptedException {
         testIt(prov.a1, prov.a2, prov.a3, prov.latch, prov.exe);
     }
 
     @Benchmark
-    public void runTwoThreads(DataProvider2 prov) throws InterruptedException {
+    public void runTwoThreadsSingleSourceActors(DataProvider2 prov) throws InterruptedException {
         testIt(prov.a1, prov.a2, prov.a3, prov.latch, prov.exe);
     }
 
     @Benchmark
-    public void runThreeThreads(DataProvider3 prov) throws InterruptedException {
+    public void runThreeThreadsSingleSourceActors(DataProvider3 prov) throws InterruptedException {
+        testIt(prov.a1, prov.a2, prov.a3, prov.latch, prov.exe);
+    }
+
+    @Benchmark
+    public void runThreeThreadsMultiSourceActors(DataProvider3_2 prov) throws InterruptedException {
         testIt(prov.a1, prov.a2, prov.a3, prov.latch, prov.exe);
     }
 
@@ -105,6 +110,28 @@ public class JmhActorBasedSumTest {
             a1 = new Actor1(g.createMultiSourceSequentialProcessor(), latch);
             a2 = new Actor2(g.createSingleSourceSequentialProcessor(), a1);
             a3 = new Actor3(g.createSingleSourceSequentialProcessor(), a1);
+        }
+
+    }
+
+    @State(Scope.Benchmark)
+    public static class DataProvider3_2 {
+
+        private ExecutorService exe;
+        private GroupingExecutor g;
+        private Actor1 a1;
+        private Actor2 a2;
+        private Actor3 a3;
+        private CountDownLatch latch;
+
+        @Setup(Level.Invocation)
+        public void init() {
+            exe = Executors.newFixedThreadPool(3);
+            g = new GroupingExecutor(exe);
+            latch = new CountDownLatch(2);
+            a1 = new Actor1(g.createMultiSourceSequentialProcessor(), latch);
+            a2 = new Actor2(g.createMultiSourceSequentialProcessor(), a1);
+            a3 = new Actor3(g.createMultiSourceSequentialProcessor(), a1);
         }
 
     }
@@ -245,20 +272,26 @@ public class JmhActorBasedSumTest {
     public void testOneThread() throws InterruptedException {
         DataProvider1 dataProvider = new DataProvider1();
         dataProvider.init();
-        this.runOneThread(dataProvider);
+        this.runOneThreadSingleSourceActors(dataProvider);
     }
 
     @Test
     public void testTwoThreads() throws InterruptedException {
         DataProvider2 dataProvider = new DataProvider2();
         dataProvider.init();
-        this.runTwoThreads(dataProvider);
+        this.runTwoThreadsSingleSourceActors(dataProvider);
     }
 
     @Test
     public void testThreeThreads() throws InterruptedException {
         DataProvider3 dataProvider = new DataProvider3();
         dataProvider.init();
-        this.runThreeThreads(dataProvider);
+        this.runThreeThreadsSingleSourceActors(dataProvider);
+    }
+    @Test
+    public void testThreeThreadsMulti() throws InterruptedException {
+        DataProvider3_2 dataProvider = new DataProvider3_2();
+        dataProvider.init();
+        this.runThreeThreadsMultiSourceActors(dataProvider);
     }
 }
