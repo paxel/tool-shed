@@ -1,5 +1,6 @@
 package paxel.bulkexecutor;
 
+import paxel.bulkexecutor.internal.ReusableSequentialProcessorBuilder;
 import paxel.bulkexecutor.internal.SingleSourceSequentialProcessor;
 
 import java.util.concurrent.ExecutorService;
@@ -33,8 +34,10 @@ public class GroupingExecutor {
     /**
      * This creates an unbounded SequentialProcessor, for singleThreaded Input.
      *
+     * @deprecated use {@link #create()} instead to create a builder for creating a {@link SequentialProcessor}
      * @return the SequentialProcessor.
      */
+    @Deprecated()
     public SequentialProcessor createSingleSourceSequentialProcessor() {
         return new SingleSourceSequentialProcessor(executorService, DEFAULT);
     }
@@ -44,9 +47,11 @@ public class GroupingExecutor {
      * case the number of unprocessed Runnables reaches the given limit, no more
      * Runnables are excepted.
      *
+     * @deprecated use {@link #create()} instead to create a builder for creating a {@link SequentialProcessor}
      * @param limit The limit for unprocessed runnables.
      * @return the SequentialProcessor.
      */
+    @Deprecated()
     public SequentialProcessor createSingleSourceBoundedSequentialProcessor(int limit) {
         return new SingleSourceSequentialProcessor(executorService, DEFAULT, limit);
     }
@@ -55,8 +60,10 @@ public class GroupingExecutor {
      * This creates an unbounded SequentialProcessor, for multithreaded Input.
      * The input performance gets worse, the more threads try to add Runnables.
      *
+     * @deprecated use {@link #create()} instead to create a builder for creating a {@link SequentialProcessor}
      * @return the SequentialProcessor.
      */
+    @Deprecated()
     public SequentialProcessor createMultiSourceSequentialProcessor() {
         return new MultiSourceSequentialProcessor(executorService, DEFAULT);
     }
@@ -67,9 +74,11 @@ public class GroupingExecutor {
      * Runnables are excepted. The input performance gets worse, the more
      * threads try to add Runnables.
      *
+     * @deprecated use {@link #create()} instead to create a builder for creating a {@link SequentialProcessor}
      * @param limit The limit for unprocessed runnables.
      * @return the SequentialProcessor.
      */
+    @Deprecated()
     public SequentialProcessor createMultiSourceBoundedSequentialProcessor(int limit) {
         return new MultiSourceSequentialProcessor(executorService, DEFAULT, limit);
     }
@@ -78,8 +87,10 @@ public class GroupingExecutor {
     /**
      * This creates an unbounded SequentialProcessor, for singleThreaded Input.
      *
+     * @deprecated use {@link #create()} instead to create a builder for creating a {@link SequentialProcessor}
      * @return the SequentialProcessor.
      */
+    @Deprecated()
     public SequentialProcessor createSingleSourceSequentialProcessor(ErrorHandler errorHandler) {
         return new SingleSourceSequentialProcessor(executorService, errorHandler);
     }
@@ -89,9 +100,11 @@ public class GroupingExecutor {
      * case the number of unprocessed Runnables reaches the given limit, no more
      * Runnables are excepted.
      *
+     * @deprecated use {@link #create()} instead to create a builder for creating a {@link SequentialProcessor}
      * @param limit The limit for unprocessed runnables.
      * @return the SequentialProcessor.
      */
+    @Deprecated()
     public SequentialProcessor createSingleSourceBoundedSequentialProcessor(int limit, ErrorHandler errorHandler) {
         return new SingleSourceSequentialProcessor(executorService, errorHandler, limit);
     }
@@ -100,8 +113,10 @@ public class GroupingExecutor {
      * This creates an unbounded SequentialProcessor, for multithreaded Input.
      * The input performance gets worse, the more threads try to add Runnables.
      *
+     * @deprecated use {@link #create()} instead to create a builder for creating a {@link SequentialProcessor}
      * @return the SequentialProcessor.
      */
+    @Deprecated()
     public SequentialProcessor createMultiSourceSequentialProcessor(ErrorHandler errorHandler) {
         return new MultiSourceSequentialProcessor(executorService, errorHandler);
     }
@@ -111,12 +126,22 @@ public class GroupingExecutor {
      * case the number of unprocessed Runnables reaches the given limit, no more
      * Runnables are excepted. The input performance gets worse, the more
      * threads try to add Runnables.
-     *
+     * @deprecated use {@link #create()} instead to create a builder for creating a {@link SequentialProcessor}
      * @param limit        The limit for unprocessed runnables.
      * @param errorHandler the handler for Exceptions that happen while processing a Runnable.
      * @return the SequentialProcessor.
      */
+    @Deprecated()
     public SequentialProcessor createMultiSourceBoundedSequentialProcessor(int limit, ErrorHandler errorHandler) {
         return new MultiSourceSequentialProcessor(executorService, errorHandler, limit);
+    }
+
+    /**
+     * Creates a SequentialProcessorBuilder that can be used to create different {@link SequentialProcessor} instances.
+     *
+     * @return the builder.
+     */
+    public SequentialProcessorBuilder create() {
+        return new ReusableSequentialProcessorBuilder(executorService);
     }
 }

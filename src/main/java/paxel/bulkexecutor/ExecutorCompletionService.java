@@ -8,7 +8,7 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * This is a simple CompletionService that combines {@link Callable}s and
- * {@link Runnable}s with CompleteableFutures. After submitting, the resulting
+ * {@link Runnable}s with CompletableFutures. After submitting, the resulting
  * future can be used to chain actions depending on the execution result.
  */
 public class ExecutorCompletionService {
@@ -48,7 +48,7 @@ public class ExecutorCompletionService {
     public <T> CompletableFuture<T> submit(Runnable task, T result) {
         CompletableFuture<Void> completableFuture = new CompletableFuture<>();
         ex.submit(new RunnableCompleter(task, completableFuture));
-        // if successfull, change the result
+        // if successful, change the result
         return completableFuture.thenApply(f -> result);
     }
 

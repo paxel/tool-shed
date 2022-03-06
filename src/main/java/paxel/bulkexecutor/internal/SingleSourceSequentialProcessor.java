@@ -104,7 +104,7 @@ public class SingleSourceSequentialProcessor implements SequentialProcessor {
         }
         // first we try to put the runnable in the queue
         final boolean offer = queue.offer(r);
-        // local copy to prevent changes in between
+        // local copy to prevent changes in between.
         int runStatusAfterAfterOffer = this.runStatus;
         if (offer) {
             for (; ; ) {

@@ -17,7 +17,7 @@ import java.util.concurrent.TimeUnit;
 @Fork(1)
 // 5 times 2 second warmup per benchmark
 @Warmup(iterations = 5, time = 2, timeUnit = TimeUnit.SECONDS)
-// 5 times 2 second measurment per benchmark
+// 5 times 2 second measurement per benchmark
 @Measurement(iterations = 5, time = 2, timeUnit = TimeUnit.SECONDS)
 // in micros
 @OutputTimeUnit(TimeUnit.SECONDS)
@@ -40,6 +40,11 @@ public class JmhActorBasedSumTest {
 
     @Benchmark
     public void runThreeThreadsMultiSourceActors(DataProvider3_2 prov) throws InterruptedException {
+        testIt(prov.a1, prov.a2, prov.a3, prov.latch, prov.exe);
+    }
+
+    @Benchmark
+    public void runBatch(DataProviderBatch prov) throws InterruptedException {
         testIt(prov.a1, prov.a2, prov.a3, prov.latch, prov.exe);
     }
 
@@ -85,9 +90,9 @@ public class JmhActorBasedSumTest {
             exe = Executors.newFixedThreadPool(2);
             g = new GroupingExecutor(exe);
             latch = new CountDownLatch(2);
-            a1 = new Actor1(g.createMultiSourceSequentialProcessor(), latch);
-            a2 = new Actor2(g.createSingleSourceSequentialProcessor(), a1);
-            a3 = new Actor3(g.createSingleSourceSequentialProcessor(), a1);
+            a1 = new Actor1(g.create().setMultiSource(true).build(), latch);
+            a2 = new Actor2(g.create().build(), a1);
+            a3 = new Actor3(g.create().build(), a1);
         }
 
     }
@@ -107,9 +112,9 @@ public class JmhActorBasedSumTest {
             exe = Executors.newFixedThreadPool(3);
             g = new GroupingExecutor(exe);
             latch = new CountDownLatch(2);
-            a1 = new Actor1(g.createMultiSourceSequentialProcessor(), latch);
-            a2 = new Actor2(g.createSingleSourceSequentialProcessor(), a1);
-            a3 = new Actor3(g.createSingleSourceSequentialProcessor(), a1);
+            a1 = new Actor1(g.create().setMultiSource(true).build(), latch);
+            a2 = new Actor2(g.create().build(), a1);
+            a3 = new Actor3(g.create().build(), a1);
         }
 
     }
@@ -129,9 +134,9 @@ public class JmhActorBasedSumTest {
             exe = Executors.newFixedThreadPool(3);
             g = new GroupingExecutor(exe);
             latch = new CountDownLatch(2);
-            a1 = new Actor1(g.createMultiSourceSequentialProcessor(), latch);
-            a2 = new Actor2(g.createMultiSourceSequentialProcessor(), a1);
-            a3 = new Actor3(g.createMultiSourceSequentialProcessor(), a1);
+            a1 = new Actor1(g.create().setMultiSource(true).build(), latch);
+            a2 = new Actor2(g.create().setMultiSource(true).build(), a1);
+            a3 = new Actor3(g.create().setMultiSource(true).build(), a1);
         }
 
     }
@@ -151,9 +156,31 @@ public class JmhActorBasedSumTest {
             exe = Executors.newFixedThreadPool(1);
             g = new GroupingExecutor(exe);
             latch = new CountDownLatch(2);
-            a1 = new Actor1(g.createMultiSourceSequentialProcessor(), latch);
-            a2 = new Actor2(g.createSingleSourceSequentialProcessor(), a1);
-            a3 = new Actor3(g.createSingleSourceSequentialProcessor(), a1);
+            a1 = new Actor1(g.create().setMultiSource(true).build(), latch);
+            a2 = new Actor2(g.create().build(), a1);
+            a3 = new Actor3(g.create().build(), a1);
+        }
+
+    }
+
+    @State(Scope.Benchmark)
+    public static class DataProviderBatch {
+
+        private ExecutorService exe;
+        private GroupingExecutor g;
+        private Actor1 a1;
+        private Actor2 a2;
+        private Actor3 a3;
+        private CountDownLatch latch;
+
+        @Setup(Level.Invocation)
+        public void init() {
+            exe = Executors.newFixedThreadPool(1);
+            g = new GroupingExecutor(exe);
+            latch = new CountDownLatch(2);
+            a1 = new Actor1(g.create().setBatchSize(100).setMultiSource(true).build(), latch);
+            a2 = new Actor2(g.create().setBatchSize(100).build(), a1);
+            a3 = new Actor3(g.create().setBatchSize(100).build(), a1);
         }
 
     }
@@ -288,10 +315,18 @@ public class JmhActorBasedSumTest {
         dataProvider.init();
         this.runThreeThreadsSingleSourceActors(dataProvider);
     }
+
     @Test
     public void testThreeThreadsMulti() throws InterruptedException {
         DataProvider3_2 dataProvider = new DataProvider3_2();
         dataProvider.init();
         this.runThreeThreadsMultiSourceActors(dataProvider);
+    }
+
+    @Test
+    public void testBatch() throws InterruptedException {
+        DataProviderBatch dataProvider = new DataProviderBatch();
+        dataProvider.init();
+        this.runBatch(dataProvider);
     }
 }
