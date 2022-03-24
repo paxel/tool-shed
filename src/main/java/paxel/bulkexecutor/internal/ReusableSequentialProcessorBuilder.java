@@ -3,8 +3,6 @@ package paxel.bulkexecutor.internal;
 import paxel.bulkexecutor.ErrorHandler;
 import paxel.bulkexecutor.SequentialProcessor;
 import paxel.bulkexecutor.SequentialProcessorBuilder;
-import paxel.bulkexecutor.internal.MultiSourceSequentialProcessor;
-import paxel.bulkexecutor.internal.SingleSourceSequentialProcessor;
 
 import java.util.concurrent.ExecutorService;
 
@@ -13,7 +11,8 @@ import static java.util.Objects.requireNonNull;
 public class ReusableSequentialProcessorBuilder implements SequentialProcessorBuilder {
     private ExecutorService executorService;
     private boolean multiSource = true;
-    private int limit = 0;
+    private int limit;
+    private boolean blocking;
     private int batchSize = 1;
     private ErrorHandler errorHandler = x -> true;
 
@@ -51,17 +50,52 @@ public class ReusableSequentialProcessorBuilder implements SequentialProcessorBu
     }
 
     @Override
+    public boolean isBlocking() {
+        return blocking;
+    }
+
+    @Override
+    public SequentialProcessorBuilder setBlocking(boolean blocking) {
+        this.blocking = blocking;
+        return this;
+    }
+
+    @Override
+    public ExecutorService getExecutorService() {
+        return executorService;
+    }
+
+    @Override
+    public boolean isMultiSource() {
+        return multiSource;
+    }
+
+    @Override
+    public int getLimit() {
+        return limit;
+    }
+
+    @Override
+    public int getBatchSize() {
+        return batchSize;
+    }
+
+    @Override
+    public ErrorHandler getErrorHandler() {
+        return errorHandler;
+    }
+
+    @Override
     public SequentialProcessor build() {
         if (multiSource) {
             if (limit > 0) {
-                return new MultiSourceSequentialProcessor(executorService, batchSize, errorHandler, limit);
-            } else {
-                return new MultiSourceSequentialProcessor(executorService, batchSize, errorHandler);
+                return new MultiSourceSequentialProcessor(executorService, batchSize, errorHandler, limit, blocking);
             }
-        } else if (limit > 0) {
-            return new SingleSourceSequentialProcessor(executorService, batchSize, errorHandler, limit);
-        } else {
-            return new SingleSourceSequentialProcessor(executorService, batchSize, errorHandler);
+            return new MultiSourceSequentialProcessor(executorService, batchSize, errorHandler, 0, false);
         }
+        if (limit > 0) {
+            return new SingleSourceSequentialProcessor(executorService, batchSize, errorHandler, limit, blocking);
+        }
+        return new SingleSourceSequentialProcessor(executorService, batchSize, errorHandler, 0, false);
     }
 }

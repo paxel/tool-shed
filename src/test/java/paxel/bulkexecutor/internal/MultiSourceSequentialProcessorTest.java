@@ -12,7 +12,7 @@ import java.util.concurrent.TimeUnit;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 
-public class SingleSourceSequentialProcessorTest {
+public class MultiSourceSequentialProcessorTest {
 
     private int value;
     private List<Integer> values;
@@ -23,15 +23,15 @@ public class SingleSourceSequentialProcessorTest {
         values = new ArrayList<>();
     }
 
-    private SingleSourceSequentialProcessor p;
+    private MultiSourceSequentialProcessor p;
 
-    public SingleSourceSequentialProcessorTest() {
+    public MultiSourceSequentialProcessorTest() {
     }
 
     @Test
     public void testExecuteOne() throws InterruptedException {
         final ExecutorService exe = Executors.newFixedThreadPool(4);
-        p = new SingleSourceSequentialProcessor(exe, 1, a -> true, 0, false);
+        p = new MultiSourceSequentialProcessor(exe, 1, a -> true, 0, false);
 
         p.add(() -> this.value = 1);
 
@@ -44,7 +44,7 @@ public class SingleSourceSequentialProcessorTest {
     @Test
     public void testExecuteOneBlocking() throws InterruptedException {
         final ExecutorService exe = Executors.newFixedThreadPool(4);
-        p = new SingleSourceSequentialProcessor(exe, 1, a -> true, 1, true);
+        p = new MultiSourceSequentialProcessor(exe, 1, a -> true, 1, true);
 
         p.add(() -> this.value = 1);
 
@@ -57,7 +57,7 @@ public class SingleSourceSequentialProcessorTest {
     @Test
     public void testExecute1000() throws InterruptedException {
         final ExecutorService exe = Executors.newFixedThreadPool(4);
-        p = new SingleSourceSequentialProcessor(exe, 1, a -> true, 0, false);
+        p = new MultiSourceSequentialProcessor(exe, 1, a -> true, 0, false);
 
         final List<Integer> result = new ArrayList<>();
         for (int i = 0; i < 1000; i++) {
@@ -74,7 +74,7 @@ public class SingleSourceSequentialProcessorTest {
     @Test
     public void testExecute1000Blocking() throws InterruptedException {
         final ExecutorService exe = Executors.newFixedThreadPool(4);
-        p = new SingleSourceSequentialProcessor(exe, 1, a -> true, 1, true);
+        p = new MultiSourceSequentialProcessor(exe, 1, a -> true, 1, true);
 
         final List<Integer> result = new ArrayList<>();
         for (int i = 0; i < 1000; i++) {
@@ -91,7 +91,7 @@ public class SingleSourceSequentialProcessorTest {
     @Test
     public void testExecute100Interrupted() throws InterruptedException {
         final ExecutorService exe = Executors.newFixedThreadPool(4);
-        p = new SingleSourceSequentialProcessor(exe, 1, a -> true, 0, false);
+        p = new MultiSourceSequentialProcessor(exe, 1, a -> true, 0, false);
 
         final List<Integer> result = new ArrayList<>();
         for (int i = 0; i < 100; i++) {
@@ -108,7 +108,7 @@ public class SingleSourceSequentialProcessorTest {
     @Test
     public void testExecute100InterruptedBlocking() throws InterruptedException {
         final ExecutorService exe = Executors.newFixedThreadPool(4);
-        p = new SingleSourceSequentialProcessor(exe, 1, a -> true, 1, true);
+        p = new MultiSourceSequentialProcessor(exe, 1, a -> true, 1, true);
 
         final List<Integer> result = new ArrayList<>();
         for (int i = 0; i < 100; i++) {

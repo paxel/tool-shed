@@ -1,5 +1,7 @@
 package paxel.bulkexecutor;
 
+import java.util.concurrent.ExecutorService;
+
 /**
  * Represents a builder of {@link SequentialProcessor}.
  */
@@ -37,13 +39,67 @@ public interface SequentialProcessorBuilder {
     SequentialProcessorBuilder setBatchSize(int batchSize);
 
     /**
-     * The errorhandler is called whenever a process throws an Exception. The errorhandler can return true to continue processing or false to abort all processes.
-     * The default errorhandler returns true and ignores the given information.
+     * The error handler is called whenever a process throws an Exception.
+     * The error handler can return true to continue processing or false to abort all processes.
+     * The default error handler returns true and ignores the given information.
      *
-     * @param errorHandler The errorhandler.
+     * @param errorHandler The error handler.
      * @return The builder.
      */
     SequentialProcessorBuilder setErrorHandler(ErrorHandler errorHandler);
+
+    /**
+     * If this is set to true, the processing queue is blocking and will wait until a place in the queue is available for a new message.
+     * This can lead to deadlocks in case processes are communicating with each other.
+     * If this is set to true and the limit is 0, the blocking value is ignored.
+     * <p>
+     * handle with care.
+     *
+     * @return The builder.
+     */
+    SequentialProcessorBuilder setBlocking(boolean blocking);
+
+    /**
+     * Retrieve the executor service.
+     *
+     * @return the service.
+     */
+    ExecutorService getExecutorService();
+
+    /**
+     * Retrieve the executor service.
+     *
+     * @return the service.
+     */
+    boolean isMultiSource();
+
+    /**
+     * Retrieve the executor service.
+     *
+     * @return the service.
+     */
+    boolean isBlocking();
+
+    /**
+     * Retrieve the queue limit.
+     *
+     * @return the limit.
+     */
+    int getLimit();
+
+    /**
+     * Retrieve the batch size.
+     *
+     * @return the size.
+     */
+    int getBatchSize();
+
+    /**
+     * Retrieve the error handler.
+     *
+     * @return the handler.
+     */
+    ErrorHandler getErrorHandler();
 
     /**
      * Builds a {@link SequentialProcessor with the given settings}

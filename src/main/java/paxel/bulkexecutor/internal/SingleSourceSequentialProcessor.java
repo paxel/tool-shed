@@ -5,10 +5,7 @@ import paxel.bulkexecutor.RunnableCompleter;
 import paxel.bulkexecutor.SequentialProcessor;
 
 import java.util.Queue;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.*;
 
 /**
  * This {@link SequentialProcessor} is safe to use in a single Thread. All
@@ -27,50 +24,8 @@ public class SingleSourceSequentialProcessor implements SequentialProcessor {
     private final ErrorHandler errorHandler;
     private final QueueBatchRunner queueRunner;
     private volatile int runStatus;
+    private boolean blocking;
 
-    /**
-     * Constructs an instance with an unbound queue.
-     *
-     * @param executorService The executor that runs the {@link Runnable}s.
-     * @param errorHandler    the handler that decides if the Processor continues
-     *                        in case a Runnable failed.
-     */
-    public SingleSourceSequentialProcessor(ExecutorService executorService, ErrorHandler errorHandler) {
-        queue = new ConcurrentLinkedQueue<>();
-        this.executorService = executorService;
-        this.queueRunner = new QueueBatchRunner(queue, 1);
-        this.errorHandler = errorHandler;
-    }
-
-    /**
-     * Constructs an instance with a limited queue.
-     *
-     * @param executorService The executor that runs the {@link Runnable}s.
-     * @param errorHandler    the handler that decides if the Processor continues
-     *                        in case a Runnable failed.
-     * @param limit           The limit of the input queue.
-     */
-    public SingleSourceSequentialProcessor(ExecutorService executorService, ErrorHandler errorHandler, int limit) {
-        queue = new LinkedBlockingQueue(limit);
-        this.executorService = executorService;
-        this.queueRunner = new QueueBatchRunner(queue, 1);
-        this.errorHandler = errorHandler;
-    }
-
-    /**
-     * Constructs an instance with an unbound queue.
-     *
-     * @param executorService The executor that runs the {@link Runnable}s.
-     * @param batch           The maximum number of messages to be processed before releasing the thread
-     * @param errorHandler    the handler that decides if the Processor continues
-     *                        in case a Runnable failed.
-     */
-    public SingleSourceSequentialProcessor(ExecutorService executorService, int batch, ErrorHandler errorHandler) {
-        queue = new ConcurrentLinkedQueue<>();
-        this.executorService = executorService;
-        this.queueRunner = new QueueBatchRunner(queue, batch);
-        this.errorHandler = errorHandler;
-    }
 
     /**
      * Constructs an instance with a limited queue.
@@ -80,9 +35,16 @@ public class SingleSourceSequentialProcessor implements SequentialProcessor {
      * @param errorHandler    the handler that decides if the Processor continues
      *                        in case a Runnable failed.
      * @param limit           The limit of the input queue.
+     * @param blocking        if the queue is blocking.
      */
-    public SingleSourceSequentialProcessor(ExecutorService executorService, int batch, ErrorHandler errorHandler, int limit) {
-        queue = new LinkedBlockingQueue(limit);
+    public SingleSourceSequentialProcessor(ExecutorService executorService, int batch, ErrorHandler errorHandler, int limit, boolean blocking) {
+        if (limit > 0) {
+            this.blocking = blocking;
+            queue = new ArrayBlockingQueue<>(limit);
+        } else {
+            queue = new ConcurrentLinkedQueue<>();
+            this.blocking = false;
+        }
         this.executorService = executorService;
         this.queueRunner = new QueueBatchRunner(queue, batch);
         this.errorHandler = errorHandler;
@@ -103,7 +65,16 @@ public class SingleSourceSequentialProcessor implements SequentialProcessor {
             return false;
         }
         // first we try to put the runnable in the queue
-        final boolean offer = queue.offer(r);
+
+        boolean offer = queue.offer(r);
+        if (!offer && blocking) {
+            try {
+                ((BlockingQueue) queue).put(r);
+                offer = true;
+            } catch (InterruptedException e) {
+                return false;
+            }
+        }
         // local copy to prevent changes in between.
         int runStatusAfterAfterOffer = this.runStatus;
         if (offer) {
