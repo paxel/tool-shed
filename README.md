@@ -112,3 +112,65 @@ completionService.submit(() -> doSomething())
 
 
 To use this small lib you can simply depend it: https://mvnrepository.com/artifact/io.github.paxel/group-executor/0.9.4
+
+# FrankenList
+
+The Frankenlist combines Array and LinkedList to improve sort and search performance for very full lists.
+
+If you need to maintain data sorted, you usually use either an Array or a LinkedList depending on your use case.
+
+ArrayList has random access and you can find the index very fast thanks to binary search.
+LinkedList can insert and remove objects in the list very fast.
+
+ArrayList has to copy all the elements behind an insert/remove.
+LinkedList needs to iterate over all elements to reach an index.
+
+So with growing number of entries Array and LinkedList become unusable.
+
+The FrankenList has a single ArrayList, that contains LinkedLists.
+Each LinkedList has a maximum size.
+If a LinkedList reaches that size, it is split in half and the lower half inserted into the arraylist.
+If a LinkedList is empty, it is removed from the ArrayList.
+For each ArrayList a meta object stores the global start index of the LinkedList.
+
+The benefit:
+FrankenList has nearly random access: 
+* Jump into the ArrayList at the estimated position of the index
+  * depending on globalStartIndex of that LinkedList navigate up or down the arrayList until the correct LinkedList is found
+  * navigate in this limited size LinkedList
+FrankenList has nearly the speed of a LinkedList of adding removing entries:
+  * remove from list
+    * if empty remove list from ArrayList
+    * update globalStartIndex of all LinkedLists behind the current
+  * add to list
+    * if limit reached split list and insert lower half to ArrayList
+    * update globalStartIndex of all LinkedLists behind the current
+
+```
+ArrayList
+[0: [globalStartIndex  0; [0:{17},1:{183},2:{3983},3:{9000}]] ],
+[1: [globalStartIndex  4; [4:{17000},5:{17001},6:{17002},7:{17003}]] ],
+[2: [globalStartIndex  8; [8:{18000}]] ],
+[3: [globalStartIndex  9; [9:{18117},10:{18127}11:{18217}]] ],
+[4: [globalStartIndex 12; [12:..]] ],
+[5: [globalStartIndex 16; [16:..]] ],
+[6: [globalStartIndex 20; [20:..]] ],
+[7: [globalStartIndex 24; [24:..]] ],
+[8: [globalStartIndex 30; [30:..]] ],
+[9: [globalStartIndex 32; [32:..]] ],
+``
+
+| *10 ops/s  | Franken       | Linked  | Array        |
+|------------|---------------|---------|--------------|
+| 125.000    | 4925.107      | 139.068 | **8822.953** |
+| 250.000    | **4567.353**  | 59.280  | 3948.059     |
+| 500.000    | **3523.361**  | 29.254  | 1205.781     |
+| 1.000.000  | **2988.935**  | 13.684  | 682.039      |
+| 10.000.000 | **429.508**   | 0.626   | 16.656       |
+
+The benchmark added 10 random numbers into the sorted list of the given number of elements.
+The result shows that ArrayList is incredibly fast for amounts of entries at least up to 125k.
+But at 250k already FrankenList is faster, and at 500k more than double the speed of an ArrayList.
+At a million entries, the FrankenList is 5 times faster than an ArrayList.
+At 10 million entries, it's 26 times faster
+

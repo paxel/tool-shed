@@ -3,17 +3,22 @@ package paxel.bulkexecutor;
 import java.util.*;
 
 /**
- * The FrankenList combines an ArrayList and multiple LinkedLists to allow quick navigation to a limited sized
- * linked list and fast add/remove inside that linked list. As a result this list is exceptional faster than either
- * Array or LinkedList for big amounts of data.
- * When elements are inserted to the FrankenList (read: not at the end) the the new element is always added to a LinkedList
- * which is very fast. In case this LinkedList reaches the sectionSizeLimit, it is split in half and the lower half is inserted
- * into the ArrayList containing the sections. This is quite slow, but depending on the size of the sections quite rare.
- * Additionally, all sections behind the LinkedList get their global start index incremented.
- * Searching an element in the FrankenList is searching the correct section in the ArrayList which is fast because random access
- * and then navigating in the small LinkedList to the correct position. This is quite slow.
+ * The FrankenList combines an ArrayList and multiple LinkedLists to allow quick
+ * navigation to a limited sized linked list and fast add/remove inside that
+ * linked list. As a result this list is exceptional faster than either Array or
+ * LinkedList for big amounts of data. When elements are inserted to the
+ * FrankenList (read: not at the end) the the new element is always added to a
+ * LinkedList which is very fast. In case this LinkedList reaches the
+ * sectionSizeLimit, it is split in half and the lower half is inserted into the
+ * ArrayList containing the sections. This is quite slow, but depending on the
+ * size of the sections quite rare. Additionally, all sections behind the
+ * LinkedList get their global start index incremented. Searching an element in
+ * the FrankenList is searching the correct section in the ArrayList which is
+ * fast because random access and then navigating in the small LinkedList to the
+ * correct position. This is quite slow.
  * <p>
- * Overall the search and insert times are faster than a pure ArrayList or LinkedList when the size of the map is very big.
+ * Overall the search and insert times are faster than a pure ArrayList or
+ * LinkedList when the size of the map is very big.
  */
 public class FrankenList<E> extends AbstractList<E> implements List<E>, RandomAccess {
 
@@ -24,7 +29,8 @@ public class FrankenList<E> extends AbstractList<E> implements List<E>, RandomAc
     }
 
     /**
-     * Sets the maximum size of a section. Different sizes can be quicker in different scenarios.
+     * Sets the maximum size of a section. Different sizes can be quicker in
+     * different scenarios.
      *
      * @param sectionSizeLimit The section size limit.
      */
@@ -40,6 +46,14 @@ public class FrankenList<E> extends AbstractList<E> implements List<E>, RandomAc
     @Override
     public int size() {
         return data.size();
+    }
+
+    @Override
+    public Object[] toArray() {
+        // Estimate size of array; be prepared to see more or fewer elements
+        Object[] r = new Object[size()];
+
+        return r;
     }
 
     @Override
@@ -94,6 +108,21 @@ public class FrankenList<E> extends AbstractList<E> implements List<E>, RandomAc
         return data.set(index, value);
     }
 
+    @Override
+    public void sort(Comparator<? super E> c) {
+        Object[] a = this.toArray();
+        Arrays.sort(a, (Comparator) c);
+        clear();
+        int expected = super.modCount;
+        for (Object e : a) {
+            data.add((E) e);
+            if (super.modCount != expected) {
+                throw new ConcurrentModificationException("change while sorting: content is garbage");
+            }
+        }
+        modCount++;
+    }
+
     /**
      * Retrieve the first element.
      *
@@ -137,6 +166,7 @@ public class FrankenList<E> extends AbstractList<E> implements List<E>, RandomAc
      */
     public void addLast(E value) {
         add(value);
+
     }
 
     private class ArrayListSection<E> {
@@ -253,7 +283,7 @@ public class FrankenList<E> extends AbstractList<E> implements List<E>, RandomAc
             if (guessedIndex < 0) {
                 guessedIndex = 0;
             }
-            for (; ; ) {
+            for (;;) {
                 LinkedListSection<E> test = sections.get(guessedIndex);
                 if (test.globalSectionStartIndex <= index) {
                     if (guessedIndex == lastBucket) {
