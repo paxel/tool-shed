@@ -138,7 +138,7 @@ FrankenList has nearly random access:
 * Jump into the ArrayList at the estimated position of the index
   * depending on globalStartIndex of that LinkedList navigate up or down the arrayList until the correct LinkedList is found
   * navigate in this limited size LinkedList
-FrankenList has nearly the speed of a LinkedList of adding removing entries:
+* FrankenList has nearly the speed of a LinkedList of adding removing entries:
   * remove from list
     * if empty remove list from ArrayList
     * update globalStartIndex of all LinkedLists behind the current
