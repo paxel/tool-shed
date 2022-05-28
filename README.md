@@ -147,7 +147,6 @@ FrankenList has nearly the speed of a LinkedList of adding removing entries:
     * update globalStartIndex of all LinkedLists behind the current
 
 ```
-ArrayList
 [0: [globalStartIndex  0; [0:{17},1:{183},2:{3983},3:{9000}]] ],
 [1: [globalStartIndex  4; [4:{17000},5:{17001},6:{17002},7:{17003}]] ],
 [2: [globalStartIndex  8; [8:{18000}]] ],
@@ -158,7 +157,7 @@ ArrayList
 [7: [globalStartIndex 24; [24:..]] ],
 [8: [globalStartIndex 30; [30:..]] ],
 [9: [globalStartIndex 32; [32:..]] ],
-``
+```
 
 | *10 ops/s  | Franken       | Linked  | Array        |
 |------------|---------------|---------|--------------|
