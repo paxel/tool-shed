@@ -44,23 +44,20 @@ public class FrankenList<E> extends AbstractList<E> implements List<E>, RandomAc
     }
 
     @Override
-    public int size() {
-        return data.size();
+    public void clear() {
+        data.clear();
     }
 
     @Override
-    public Object[] toArray() {
-        // Estimate size of array; be prepared to see more or fewer elements
-        Object[] r = new Object[size()];
-
-        return r;
+    public int size() {
+        return data.size();
     }
 
     @Override
     public E remove(int index) {
         final E remove = data.remove(index);
         if (remove != null) {
-            modCount--;
+            modCount++;
         }
         return remove;
     }
@@ -175,7 +172,7 @@ public class FrankenList<E> extends AbstractList<E> implements List<E>, RandomAc
 
         private final ArrayList<LinkedListSection<E>> sections = new ArrayList<>();
 
-        private int sectionCount;
+        private int entryCount;
 
         private ArrayListSection(int sectionSizeLimit) {
             this.sectionSizeLimit = sectionSizeLimit;
@@ -186,7 +183,7 @@ public class FrankenList<E> extends AbstractList<E> implements List<E>, RandomAc
         }
 
         private E remove(int index) {
-            if (sections.isEmpty() || index < 0 || index > sectionCount) {
+            if (sections.isEmpty() || index < 0 || index > entryCount) {
                 return null;
             }
 
@@ -195,10 +192,10 @@ public class FrankenList<E> extends AbstractList<E> implements List<E>, RandomAc
         }
 
         private void add(int index, E element) {
-            if (index > sectionCount) {
-                throw new IndexOutOfBoundsException("Index " + index + " is outside of " + sectionCount);
+            if (index > entryCount) {
+                throw new IndexOutOfBoundsException("Index " + index + " is outside of " + entryCount);
             }
-            if (index == sectionCount) {
+            if (index == entryCount) {
                 add(element);
             } else {
 
@@ -211,13 +208,13 @@ public class FrankenList<E> extends AbstractList<E> implements List<E>, RandomAc
                 if (section.values.size() > sectionSizeLimit) {
                     section.split(sections, rootIndex);
                 }
-                sectionCount++;
+                entryCount++;
             }
         }
 
         private E set(int index, E element) {
-            if (index >= sectionCount || index < 0) {
-                throw new IndexOutOfBoundsException("Index " + index + " is outside of [0 to" + sectionCount + '[');
+            if (index >= entryCount || index < 0) {
+                throw new IndexOutOfBoundsException("Index " + index + " is outside of [0 to" + entryCount + '[');
             }
 
             int rootIndex = guessRootIndex(index);
@@ -226,8 +223,8 @@ public class FrankenList<E> extends AbstractList<E> implements List<E>, RandomAc
         }
 
         private E get(int index) {
-            if (sections.isEmpty() || index < 0 || index > sectionCount) {
-                throw new IndexOutOfBoundsException("Index " + index + " is outside of [0 to" + sectionCount + '[');
+            if (sections.isEmpty() || index < 0 || index > entryCount) {
+                throw new IndexOutOfBoundsException("Index " + index + " is outside of [0 to" + entryCount + '[');
             }
             int rootIndex = guessRootIndex(index);
             return sections.get(rootIndex).get(index);
@@ -248,7 +245,7 @@ public class FrankenList<E> extends AbstractList<E> implements List<E>, RandomAc
                     sections.add(bucket);
                 }
             }
-            sectionCount++;
+            entryCount++;
         }
 
         private E dec(E removeResult, int currentIndex) {
@@ -261,7 +258,7 @@ public class FrankenList<E> extends AbstractList<E> implements List<E>, RandomAc
                     // this bucket is now empty. we need to remove it
                     sections.remove(currentIndex);
                 }
-                sectionCount--;
+                entryCount--;
             }
             return removeResult;
         }
@@ -309,7 +306,17 @@ public class FrankenList<E> extends AbstractList<E> implements List<E>, RandomAc
         }
 
         int size() {
-            return sectionCount;
+            return entryCount;
+        }
+
+        private void clear() {
+            int expected = modCount;
+            sections.clear();
+            entryCount = 0;
+            if (modCount != expected) {
+                throw new ConcurrentModificationException("The map was modified while clearing");
+            }
+            modCount++;
         }
 
         private class LinkedListSection<E> {

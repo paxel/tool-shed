@@ -159,7 +159,7 @@ FrankenList has nearly random access:
 [9: [globalStartIndex 32; [32:..]] ],
 ```
 
-| *10 ops/s  | Franken       | Linked  | Array        |
+| size       | Franken       | Linked  | Array        |
 |------------|---------------|---------|--------------|
 | 125.000    | 4925.107      | 139.068 | **8822.953** |
 | 250.000    | **4567.353**  | 59.280  | 3948.059     |
@@ -167,9 +167,26 @@ FrankenList has nearly random access:
 | 1.000.000  | **2988.935**  | 13.684  | 682.039      |
 | 10.000.000 | **429.508**   | 0.626   | 16.656       |
 
+The number is operations per second.
+The operation is adding 10 different numbers into the list.
+The numbers are guaranteed to be greater than the first and less than the last element in the list.
+
 The benchmark added 10 random numbers into the sorted list of the given number of elements.
 The result shows that ArrayList is incredibly fast for amounts of entries at least up to 125k.
 But at 250k already FrankenList is faster, and at 500k more than double the speed of an ArrayList.
 At a million entries, the FrankenList is 5 times faster than an ArrayList.
 At 10 million entries, it's 26 times faster
+
+
+Sorting an unsorted List is not very effective and should be avoided
+
+| size       | Franken       | Linked  | Array        |
+|------------|---------------|---------|--------------|
+| 500.000    |  1.989        | 3.751   | **4.391**    |
+| 1.000.000  |  0.916        | 1.620   | **1.899**    |
+| 10.000.000 |  0.072        | 0.102   | **0.125**    |
+
+Because the Sort is using TimSort that is running on an array, ArrayList is unbeatable here.
+The FrankenList has to copy all the LinkedLists to an Array and afterwards the sorted array back into the FrankenList.
+
 
