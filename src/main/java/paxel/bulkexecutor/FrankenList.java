@@ -111,11 +111,11 @@ public class FrankenList<E> extends AbstractList<E> implements List<E>, RandomAc
         Arrays.sort(a, (Comparator) c);
         clear();
         int expected = super.modCount;
+        if (super.modCount != expected) {
+            throw new ConcurrentModificationException("change while sorting: content is garbage");
+        }
         for (Object e : a) {
             data.add((E) e);
-            if (super.modCount != expected) {
-                throw new ConcurrentModificationException("change while sorting: content is garbage");
-            }
         }
         modCount++;
     }
@@ -232,9 +232,9 @@ public class FrankenList<E> extends AbstractList<E> implements List<E>, RandomAc
 
         private void add(E value) {
             if (sections.isEmpty()) {
-                final LinkedListSection<E> bucket = new LinkedListSection<>(0);
-                sections.add(bucket);
-                bucket.values.add(value);
+                final LinkedListSection<E> section = new LinkedListSection<>(0);
+                sections.add(section);
+                section.values.add(value);
             } else {
                 LinkedListSection<E> last = sections.get(sections.size() - 1);
                 if (last.values.size() < sectionSizeLimit) {
