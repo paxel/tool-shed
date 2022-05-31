@@ -62,7 +62,8 @@ public class JmhActorBasedSumTest {
         }
     }
 
-    private void testIt(Actor1 a1, Actor2 a2, Actor3 a3, CountDownLatch latch, ExecutorService exe) throws InterruptedException {
+    private void testIt(Actor1 a1, Actor2 a2, Actor3 a3, CountDownLatch latch, ExecutorService exe)
+            throws InterruptedException {
         addAllValues(a3, a2);
         final ShutDown shutDown = new ShutDown();
         a3.tell(shutDown);
@@ -252,13 +253,10 @@ public class JmhActorBasedSumTest {
         private final Actor1 a1;
         Random r = new Random(1000);
 
-
         private Actor3(SequentialProcessor createSingleSourceSequentialProcessor, Actor1 a1) {
             this.createSingleSourceSequentialProcessor = createSingleSourceSequentialProcessor;
             this.a1 = a1;
         }
-
-        private String result;
 
         public void tell(Integer a) {
             int size = r.nextInt(a);

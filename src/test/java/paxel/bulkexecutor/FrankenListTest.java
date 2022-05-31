@@ -41,7 +41,6 @@ public class FrankenListTest {
         FrankenList<Long> fl = new FrankenList<>();
 
         final int max = 10_000;
-        Random r = new Random(100);
         for (int i = 0; i < max; i++) {
             fl.add((long) i);
         }
@@ -57,7 +56,6 @@ public class FrankenListTest {
         FrankenList<Long> fl = new FrankenList<>();
 
         final int max = 10_000;
-        Random r = new Random(100);
         for (int i = 0; i < max; i++) {
             // all values are inserted add 0, pushing existing data down
             fl.add(0, (long) i);

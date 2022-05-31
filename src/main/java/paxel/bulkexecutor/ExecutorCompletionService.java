@@ -41,7 +41,7 @@ public class ExecutorCompletionService {
 
     public <T> CompletableFuture<T> submit(Callable<T> task) {
         CompletableFuture<T> completableFuture = new CompletableFuture<>();
-        ex.submit(new CallableCompleter(task, completableFuture));
+        ex.submit(new CallableCompleter<>(task, completableFuture));
         return completableFuture;
     }
 

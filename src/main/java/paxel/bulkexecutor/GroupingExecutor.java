@@ -1,11 +1,8 @@
 package paxel.bulkexecutor;
 
-import paxel.bulkexecutor.internal.ReusableSequentialProcessorBuilder;
-import paxel.bulkexecutor.internal.SingleSourceSequentialProcessor;
-
 import java.util.concurrent.ExecutorService;
 
-import paxel.bulkexecutor.internal.MultiSourceSequentialProcessor;
+import paxel.bulkexecutor.internal.ReusableSequentialProcessorBuilder;
 
 /**
  * The Grouping Executor provides SequentialProcessors that process Runnables
@@ -18,7 +15,6 @@ import paxel.bulkexecutor.internal.MultiSourceSequentialProcessor;
  */
 public class GroupingExecutor {
 
-    private final ErrorHandler DEFAULT = x -> true;
     private final ExecutorService executorService;
 
     /**

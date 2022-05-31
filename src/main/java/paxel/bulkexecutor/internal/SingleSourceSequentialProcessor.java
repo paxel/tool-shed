@@ -26,18 +26,19 @@ public class SingleSourceSequentialProcessor implements SequentialProcessor {
     private volatile int runStatus;
     private boolean blocking;
 
-
     /**
      * Constructs an instance with a limited queue.
      *
      * @param executorService The executor that runs the {@link Runnable}s.
-     * @param batch           The maximum number of messages to be processed before releasing the thread
+     * @param batch           The maximum number of messages to be processed before
+     *                        releasing the thread
      * @param errorHandler    the handler that decides if the Processor continues
      *                        in case a Runnable failed.
      * @param limit           The limit of the input queue.
      * @param blocking        if the queue is blocking.
      */
-    public SingleSourceSequentialProcessor(ExecutorService executorService, int batch, ErrorHandler errorHandler, int limit, boolean blocking) {
+    public SingleSourceSequentialProcessor(ExecutorService executorService, int batch, ErrorHandler errorHandler,
+            int limit, boolean blocking) {
         if (limit > 0) {
             this.blocking = blocking;
             queue = new ArrayBlockingQueue<>(limit);
@@ -69,16 +70,17 @@ public class SingleSourceSequentialProcessor implements SequentialProcessor {
         boolean offer = queue.offer(r);
         if (!offer && blocking) {
             try {
-                ((BlockingQueue) queue).put(r);
+                ((BlockingQueue<Runnable>) queue).put(r);
                 offer = true;
             } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
                 return false;
             }
         }
         // local copy to prevent changes in between.
         int runStatusAfterAfterOffer = this.runStatus;
         if (offer) {
-            for (; ; ) {
+            for (;;) {
                 switch (runStatusAfterAfterOffer) {
                     case IDLE: {
                         /**
@@ -88,7 +90,8 @@ public class SingleSourceSequentialProcessor implements SequentialProcessor {
                         this.runStatus = QUEUED;
                         CompletableFuture<Void> future = new CompletableFuture<>();
                         // when the QueueRunner is finished, the finished method will be executed.
-                        // adding the handle method before the submit makes sure the fiinished method is always called by the executor framework
+                        // adding the handle method before the submit makes sure the fiinished method is
+                        // always called by the executor framework
                         future.handle((a, b) -> finished(b));
                         executorService.submit(new RunnableCompleter(queueRunner, future));
                         return true;
@@ -142,17 +145,18 @@ public class SingleSourceSequentialProcessor implements SequentialProcessor {
     private Void finished(Throwable ex) {
         // we mark that we are finished and have to decide what we do next.
         runStatus = FINISHED;
-        if (ex != null) {
-            // The Runnable failed and we must let the Errorhandler decide if we abort.
-            if (!errorHandler.check(ex)) {
-                // The errorhandler aborts processing. we clear the queue and set on abort to avoid accepting new jobs
-                this.runStatus = ABORT;
-                queue.clear();
-                return null;
-            }
+        if (ex != null && !errorHandler.check(ex)) {
+            // The errorhandler aborts processing. we clear the queue and set on abort to
+            // avoid accepting new jobs
+            this.runStatus = ABORT;
+            queue.clear();
+            return null;
         }
-        // the job has finished (successfully). If something is still in the queue, we enqueue a new QueueRunner.
-        if (!queue.isEmpty()) {
+        // the job has finished (successfully). If something is still in the queue, we
+        // enqueue a new QueueRunner.
+        if (!queue.isEmpty())
+
+        {
             // mark queued after check
             runStatus = QUEUED;
             // we submit the QueueRunner again.
