@@ -108,11 +108,15 @@ public class FrankenList<E> extends AbstractList<E> implements RandomAccess {
         Object[] a = this.toArray();
         Arrays.sort(a, (Comparator) c);
         if (super.modCount != expected) {
-            throw new ConcurrentModificationException("change while sorting: sort aborted.");
+            throw new ConcurrentModificationException("modified while sorting: sort aborted.");
         }
         clear();
+        expected = super.modCount;
         for (Object e : a) {
             data.add((E) e);
+        }
+        if (super.modCount != expected) {
+            throw new ConcurrentModificationException("modified while sorting: list is corrupted.");
         }
         modCount++;
     }
