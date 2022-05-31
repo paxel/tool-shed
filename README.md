@@ -159,34 +159,89 @@ FrankenList has nearly random access:
 [9: [globalStartIndex 32; [32:..]] ],
 ```
 
-| size       | Franken       | Linked  | Array        |
-|------------|---------------|---------|--------------|
-| 125.000    | 4925.107      | 139.068 | **8822.953** |
-| 250.000    | **4567.353**  | 59.280  | 3948.059     |
-| 500.000    | **3523.361**  | 29.254  | 1205.781     |
-| 1.000.000  | **2988.935**  | 13.684  | 682.039      |
-| 10.000.000 | **429.508**   | 0.626   | 16.656       |
+## Benchmarks
 
-The number is operations per second.
-The operation is adding 10 different numbers into the list.
-The numbers are guaranteed to be greater than the first and less than the last element in the list.
-
+### Insert multiple values in a list
 The benchmark added 10 random numbers into the sorted list of the given number of elements.
 The result shows that ArrayList is incredibly fast for amounts of entries at least up to 125k.
 But at 250k already FrankenList is faster, and at 500k more than double the speed of an ArrayList.
 At a million entries, the FrankenList is 5 times faster than an ArrayList.
 At 10 million entries, it's 26 times faster
 
+**Benchmarked code:**
+```java
+for (Long long1 : unsortedNewValues) { // 10 random values
+    int binarySearch = Collections.binarySearch(listUnderTest, long1);
+    if (binarySearch < 0) {
+        listUnderTest.add((binarySearch * -1) - 1, long1);
+    } else {
+        listUnderTest.set(binarySearch, long1);
+    }
+}
+```
 
+**Result:**
+| size       | Franken   | Linked  | Array        |
+|------------|-----------|---------|--------------|
+| 125.000    | 4925      | 139     | **8822**     |
+| 250.000    | **4567**  | 59      | 3948         |
+| 500.000    | **3523**  | 29      | 1205         |
+| 1.000.000  | **2988**  | 13      | 682          |
+| 10.000.000 | **429**   | 0       | 16           |
+
+The number is operations per second.
+The operation is adding 10 different numbers into the list.
+The numbers are guaranteed to be greater than the first and less than the last element in the list.
+
+
+### Sorting an unsorted list
 Sorting an unsorted List is not very effective and should be avoided
 
-| size       | Franken       | Linked  | Array        |
-|------------|---------------|---------|--------------|
-| 500.000    |  1.989        | 3.751   | **4.391**    |
-| 1.000.000  |  0.916        | 1.620   | **1.899**    |
-| 10.000.000 |  0.072        | 0.102   | **0.125**    |
+**Benchmarked code:**
+```java
+Collections.sort(unsortedNewValues);
+```
+
+**Result:**
+| size       | Franken       | Linked  | Array    |
+|------------|---------------|---------|----------|
+| 500.000    |  1            | 3       | **4**    |
+| 1.000.000  |  0            | 1       | **1**    |
+| 10.000.000 |  0            | 0       | **0**    |
 
 Because the Sort is using TimSort that is running on an array, ArrayList is unbeatable here.
 The FrankenList has to copy all the LinkedLists to an Array and afterwards the sorted array back into the FrankenList.
 
 
+### Searching an entry and use a ListFilter to manipulate the environment
+The main usecase what the FrankenList was designed for was being used with a ListIterator
+to manipulate some values at a given position. e.g finding an entry, examining the surrounding entries and
+eventually remove, replace and/or insert an entry.
+
+**Benchmarked code:**
+```java
+int index = unsortedNewValues.get(0).intValue();
+ListIterator<Long> listIterator = listUnderTest.listIterator(index);
+Iterator<Long> iterator = unsortedNewValues.iterator();
+while (iterator.hasNext()) {// 10 random values
+    if (listIterator.hasNext()) {
+        listIterator.next();
+    } else {
+        listIterator.previous();
+    }
+    listIterator.remove();
+    listIterator.add(iterator.next());
+}
+```
+
+**Result:**
+| size       | Franken    | Linked  | Array |
+|------------|------------|---------|-------|
+| 125.000    | **74973**  | 13422   | 25952 |
+| 250.000    | **47378**  |  1731   |  2128 |
+| 500.000    | **23597**  |  1375   |   793 |
+| 1.000.000  | **12921**  |   501   |   531 |
+| 10.000.000 |   **718**  |    33   |    17 |
+
+Even in situations where the ArrayList was fasten before, it is slower in this
+scenario.
