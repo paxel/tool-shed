@@ -1,4 +1,16 @@
-# group-executor
+# mvn dependency
+
+To use this small lib you can simply depend it via maven
+
+```xml
+<dependency>
+    <groupId>io.github.paxel</groupId>
+    <artifactId>group-executor</artifactId>
+    <version>0.9.9</version>
+</dependency>
+```
+
+# Feature group-executor
 This is an executor that runs processes that belong to a group sequentially.
 Multiple groups run in parallel, depending on how the executor is configured.
 
@@ -59,7 +71,7 @@ Q: Why use this anyway? I can just use a single Threaded Executor in the Bunny.
 A: Yes, but if you have 1_000_000 Bunnies, you peak at 1 mio Threads. Good bye.
 
 Q: Well I could use a limited ExecutorService and limit it to 20.   
-A: Yes, but then one bunny is hopping simultaneously up and down. Good bye.
+A: Yes, but then one bunny is hopping concurrently up **and** down. Good bye.
 
 Q: I can not get the value x out of the bunny.   
 A: wrong. check that:
@@ -74,7 +86,7 @@ A: wrong. check that:
     }
 ```
 
-you will receive the value of x that it will have logically after processing all hops, that it was asked to do before.
+you will receive the value of x that is current at the point of time that the queued element is processed.
 
 Q: well thats not very comfortable.   
 A: just use a CompletableFuture instead an IntConsumer and you can react to the value immediately
@@ -98,8 +110,8 @@ A: just use a CompletableFuture instead an IntConsumer and you can react to the 
 
 This is not expected to be the most performant solution. But it should be fairly simple to use.
 
-# ExecutorCompletionService
-Another feature this package provides is the ExecutorCompletionService, that converts the lame Futures of the Executor framework to the mighty CompletionFutures.
+# Feature ExecutorCompletionService
+Another feature this library provides is the ExecutorCompletionService, that converts the lame Futures of the Executor framework to the mighty CompletionFutures.
 
 ```java
 ExecutorCompletionService completionService = new ExecutorCompletionService(Executors.newFixedThreadPool(1));
@@ -111,9 +123,7 @@ completionService.submit(() -> doSomething())
 ```
 
 
-To use this small lib you can simply depend it: https://mvnrepository.com/artifact/io.github.paxel/group-executor/0.9.4
-
-# FrankenList
+# Feature FrankenList
 
 The Frankenlist combines Array and LinkedList to improve sort and search performance for very full lists.
 
@@ -245,3 +255,7 @@ while (iterator.hasNext()) {// 10 random values
 
 Even in situations where the ArrayList was fasten before, it is slower in this
 scenario.
+It must be said, that the ListIterator here is not optimized.
+A dedicated FrankenListIterator will improve this value additionally.
+
+
