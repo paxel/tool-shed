@@ -22,7 +22,7 @@ public class JmhStreamPerformanceMeasurement {
     }
 
     @Benchmark
-    public void collectFor(Blackhole bh, DataProvider10m data) {
+    public void collectFor(Blackhole bh, DataProvider data) {
         Set<Long> collect = new HashSet<>();
         for (Long unsortedNewValue : data.unsortedNewValues)
             collect.add(unsortedNewValue);
@@ -30,7 +30,7 @@ public class JmhStreamPerformanceMeasurement {
     }
 
     @Benchmark
-    public void collectForGet(Blackhole bh, DataProvider10m data) {
+    public void collectForGet(Blackhole bh, DataProvider data) {
         Set<Long> collect = new HashSet<>();
         for (int i = 0; i < data.unsortedNewValues.size(); i++)
             collect.add(data.unsortedNewValues.get(i));
@@ -38,13 +38,13 @@ public class JmhStreamPerformanceMeasurement {
     }
 
     @Benchmark
-    public void collectStream(Blackhole bh, DataProvider10m data) {
+    public void collectStream(Blackhole bh, DataProvider data) {
         Set<Long> collect = data.unsortedNewValues.stream().collect(Collectors.toSet());
         bh.consume(collect);
     }
 
     @Benchmark
-    public void collectFilteredFor(Blackhole bh, DataProvider10m data) {
+    public void collectFilteredFor(Blackhole bh, DataProvider data) {
         Set<Long> collect = new HashSet<>();
         for (Long unsortedNewValue : data.unsortedNewValues) {
             if (unsortedNewValue % 5 == 0)
@@ -54,7 +54,7 @@ public class JmhStreamPerformanceMeasurement {
     }
 
     @Benchmark
-    public void collectFilteredForGet(Blackhole bh, DataProvider10m data) {
+    public void collectFilteredForGet(Blackhole bh, DataProvider data) {
         Set<Long> collect = new HashSet<>();
         for (int i = 0; i < data.unsortedNewValues.size(); i++) {
             Long aLong = data.unsortedNewValues.get(i);
@@ -65,7 +65,7 @@ public class JmhStreamPerformanceMeasurement {
     }
 
     @Benchmark
-    public void collectFilteredStream(Blackhole bh, DataProvider10m data) {
+    public void collectFilteredStream(Blackhole bh, DataProvider data) {
         Set<Long> collect = data.unsortedNewValues.stream()
                 .filter(f -> f % 5 == 0)
                 .collect(Collectors.toSet());
@@ -73,7 +73,7 @@ public class JmhStreamPerformanceMeasurement {
     }
 
     @Benchmark
-    public void easyTaskFor(Blackhole bh, DataProvider10m data) {
+    public void easyTaskFor(Blackhole bh, DataProvider data) {
         data.sum = 0;
         for (Long unsortedNewValue : data.unsortedNewValues)
             data.easyTask(unsortedNewValue);
@@ -81,7 +81,7 @@ public class JmhStreamPerformanceMeasurement {
     }
 
     @Benchmark
-    public void easyTaskForGet(Blackhole bh, DataProvider10m data) {
+    public void easyTaskForGet(Blackhole bh, DataProvider data) {
         data.sum = 0;
         for (int i = 0; i < data.unsortedNewValues.size(); i++)
             data.easyTask(data.unsortedNewValues.get(i));
@@ -90,14 +90,14 @@ public class JmhStreamPerformanceMeasurement {
 
 
     @Benchmark
-    public void easyTaskStream(Blackhole bh, DataProvider10m data) {
+    public void easyTaskStream(Blackhole bh, DataProvider data) {
         data.sum = 0;
-        data.unsortedNewValues.stream().mapToLong(Long::longValue).forEach(f -> data.easyTask(f));
+        data.unsortedNewValues.stream().mapToLong(Long::longValue).forEach(data::easyTask);
         bh.consume(data.sum);
     }
 
     @Benchmark
-    public void heavyTaskFor(Blackhole bh, DataProvider10m data) {
+    public void heavyTaskFor(Blackhole bh, DataProvider data) {
         data.sum = 0;
         for (Long unsortedNewValue : data.unsortedNewValues)
             data.heavyTask(unsortedNewValue);
@@ -105,7 +105,7 @@ public class JmhStreamPerformanceMeasurement {
     }
 
     @Benchmark
-    public void heavyTaskForGet(Blackhole bh, DataProvider10m data) {
+    public void heavyTaskForGet(Blackhole bh, DataProvider data) {
         data.sum = 0;
         for (int i = 0; i < data.unsortedNewValues.size(); i++)
             data.heavyTask(data.unsortedNewValues.get(i));
@@ -114,22 +114,22 @@ public class JmhStreamPerformanceMeasurement {
 
 
     @Benchmark
-    public void heavyTaskStream(Blackhole bh, DataProvider10m data) {
+    public void heavyTaskStream(Blackhole bh, DataProvider data) {
         data.sum = 0;
-        data.unsortedNewValues.stream().mapToLong(Long::longValue).forEach(f -> data.heavyTask(f));
+        data.unsortedNewValues.stream().mapToLong(Long::longValue).forEach(data::heavyTask);
         bh.consume(data.sum);
     }
 
 
     @State(Scope.Benchmark)
-    public static class DataProvider10m {
+    public static class DataProvider {
         Random r = new Random(100);
 
         List<Long> unsortedNewValues;
 
         @Setup(Level.Invocation)
         public void init() {
-            final int max = 10_000_000;
+            final int max = 10000;
             unsortedNewValues = new ArrayList<>();
             for (int i = 0; i < max; i++) {
                 unsortedNewValues.add((long) r.nextInt(max));
