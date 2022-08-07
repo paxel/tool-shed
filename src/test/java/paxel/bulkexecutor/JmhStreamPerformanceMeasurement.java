@@ -92,7 +92,7 @@ public class JmhStreamPerformanceMeasurement {
     @Benchmark
     public void easyTaskStream(Blackhole bh, DataProvider10m data) {
         data.sum = 0;
-        data.unsortedNewValues.stream().forEach(f -> data.easyTask(f));
+        data.unsortedNewValues.stream().mapToLong(Long::longValue).forEach(f -> data.easyTask(f));
         bh.consume(data.sum);
     }
 
@@ -116,7 +116,7 @@ public class JmhStreamPerformanceMeasurement {
     @Benchmark
     public void heavyTaskStream(Blackhole bh, DataProvider10m data) {
         data.sum = 0;
-        data.unsortedNewValues.stream().forEach(f -> data.heavyTask(f));
+        data.unsortedNewValues.stream().mapToLong(Long::longValue).forEach(f -> data.heavyTask(f));
         bh.consume(data.sum);
     }
 
@@ -142,11 +142,11 @@ public class JmhStreamPerformanceMeasurement {
             return r.nextLong();
         }
 
-        private void easyTask(Long unsortedNewValue) {
+        private void easyTask(long unsortedNewValue) {
             sum = sum + unsortedNewValue;
         }
 
-        private void heavyTask(Long unsortedNewValue) {
+        private void heavyTask(long unsortedNewValue) {
             if (sum % 2 == 0) {
                 sum = unsortedNewValue % 7 * sum % 9;
             } else {
