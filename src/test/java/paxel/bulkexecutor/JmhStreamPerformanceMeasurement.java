@@ -74,7 +74,6 @@ public class JmhStreamPerformanceMeasurement {
 
     @Benchmark
     public void easyTaskFor(Blackhole bh, DataProvider data) {
-        data.sum = 0;
         for (Long unsortedNewValue : data.unsortedNewValues)
             data.easyTask(unsortedNewValue);
         bh.consume(data.sum);
@@ -82,7 +81,6 @@ public class JmhStreamPerformanceMeasurement {
 
     @Benchmark
     public void easyTaskForGet(Blackhole bh, DataProvider data) {
-        data.sum = 0;
         for (int i = 0; i < data.unsortedNewValues.size(); i++)
             data.easyTask(data.unsortedNewValues.get(i));
         bh.consume(data.sum);
@@ -91,14 +89,12 @@ public class JmhStreamPerformanceMeasurement {
 
     @Benchmark
     public void easyTaskStream(Blackhole bh, DataProvider data) {
-        data.sum = 0;
         data.unsortedNewValues.stream().mapToLong(Long::longValue).forEach(data::easyTask);
         bh.consume(data.sum);
     }
 
     @Benchmark
     public void heavyTaskFor(Blackhole bh, DataProvider data) {
-        data.sum = 0;
         for (Long unsortedNewValue : data.unsortedNewValues)
             data.heavyTask(unsortedNewValue);
         bh.consume(data.sum);
@@ -106,7 +102,6 @@ public class JmhStreamPerformanceMeasurement {
 
     @Benchmark
     public void heavyTaskForGet(Blackhole bh, DataProvider data) {
-        data.sum = 0;
         for (int i = 0; i < data.unsortedNewValues.size(); i++)
             data.heavyTask(data.unsortedNewValues.get(i));
         bh.consume(data.sum);
@@ -115,7 +110,6 @@ public class JmhStreamPerformanceMeasurement {
 
     @Benchmark
     public void heavyTaskStream(Blackhole bh, DataProvider data) {
-        data.sum = 0;
         data.unsortedNewValues.stream().mapToLong(Long::longValue).forEach(data::heavyTask);
         bh.consume(data.sum);
     }
@@ -123,16 +117,18 @@ public class JmhStreamPerformanceMeasurement {
 
     @State(Scope.Benchmark)
     public static class DataProvider {
+        @Param({"10", "10000", "10000000"})
+        int entries;
+
         Random r = new Random(100);
 
         List<Long> unsortedNewValues;
 
         @Setup(Level.Invocation)
         public void init() {
-            final int max = 10000;
             unsortedNewValues = new ArrayList<>();
-            for (int i = 0; i < max; i++) {
-                unsortedNewValues.add((long) r.nextInt(max));
+            for (int i = 0; i < entries; i++) {
+                unsortedNewValues.add((long) r.nextInt(entries));
             }
         }
 
