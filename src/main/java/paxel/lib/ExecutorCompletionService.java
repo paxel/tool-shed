@@ -1,4 +1,7 @@
-package paxel.bulkexecutor;
+package paxel.lib;
+
+import paxel.bulkexecutor.CallableCompleter;
+import paxel.bulkexecutor.RunnableCompleter;
 
 import java.util.List;
 import java.util.concurrent.Callable;

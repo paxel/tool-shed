@@ -1,4 +1,4 @@
-package paxel.bulkexecutor;
+package paxel.lib;
 
 import java.util.*;
 

@@ -1,7 +1,8 @@
-package paxel.bulkexecutor;
+package paxel.lib;
 
 import org.hamcrest.core.IsNull;
 import org.junit.Test;
+import paxel.lib.ExecutorCompletionService;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.Executors;
