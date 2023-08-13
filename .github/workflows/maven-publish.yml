@@ -21,7 +21,7 @@ jobs:
         uses: ncipollo/release-action@v1
         with:
           allowUpdates: true
-          artifacts: "${{ github.workspace }}/target/*.jar,${{ github.workspace }}/target/*.pom"
+          artifacts: "${{ github.workspace }}/target/*.jar,${{ github.workspace }}/pom.xml"
           token: ${{ secrets.GITHUB_TOKEN }}
       - name: Publish to the Maven Central Repository
         run: |
@@ -32,6 +32,9 @@ jobs:
         env:
           MAVEN_USERNAME: ${{ secrets.OSSRH_USERNAME }}
           MAVEN_PASSWORD: ${{ secrets.OSSRH_TOKEN }}
+          SIGN_KEY: ${{ secrets.SIGN_KEY }}
+          SIGN_KEY_ID: ${{ secrets.SIGN_KEY_ID }}
+          SIGN_KEY_PASS: ${{ secrets.SIGN_KEY_PASS }}
       - name: Publish package
         run: mvn --batch-mode deploy
         env:
