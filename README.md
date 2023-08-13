@@ -6,7 +6,7 @@ To use this small lib you can simply depend it via maven
 <dependency>
     <groupId>io.github.paxel</groupId>
     <artifactId>group-executor</artifactId>
-    <version>0.9.9</version>
+    <version>0.10.1</version>
 </dependency>
 ```
 
@@ -275,7 +275,7 @@ while (iterator.hasNext()) {// 10 random values
 | 1.000.000  | **12921**  |   501   |   531 |
 | 10.000.000 |   **718**  |    33   |    17 |
 
-Even in situations where the ArrayList was fasten before, it is slower in this
+Even in situations where the ArrayList was faster before, it is slower in this
 scenario.
 It must be said, that the ListIterator here is not optimized.
 A dedicated FrankenListIterator will improve this value additionally.
