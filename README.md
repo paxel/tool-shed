@@ -110,6 +110,28 @@ A: just use a CompletableFuture instead an IntConsumer and you can react to the 
 
 This is not expected to be the most performant solution. But it should be fairly simple to use.
 
+# Feature Result<V,E>
+
+In Rsut there are no exceptions, but panics.
+A generic set of enums Ok and Err are used to return valid results and errors.
+The Ok enum value contains the result and the Err comtains the reason why there is no Ok result.
+There are some code candy to handle the two types that don't exist in Java.
+
+But there are places where this procedural handling of Results is handy and leads to more understandable code (at least for me), so I started implementing my own Result class that tries to mimic the RUST way.
+
+```java
+    public Result<Login, IOException> ensureLogin(){
+        Result<Auth, RESTException> login=checkLoginToRestService();
+        if(!login.isSuccess())
+          return login.mapError(e->new IOException("Could not login to ID Server",e));
+
+        if(!login.getValue().isLoggedIn())
+          return Result.err(new IOException("The ID server doesn't accept our login"));
+
+          return login.mapValue(v->new Login(v.getAuthId()));
+    }
+```
+
 # Feature ExecutorCompletionService
 Another feature this library provides is the ExecutorCompletionService, that converts the lame Futures of the Executor framework to the mighty CompletionFutures.
 

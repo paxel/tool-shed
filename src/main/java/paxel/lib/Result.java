@@ -1,5 +1,9 @@
 package paxel.lib;
 
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+
 import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -10,6 +14,10 @@ import java.util.function.Supplier;
  * @param <V> the value type of the Result.
  * @param <E> the error type of the Result.
  */
+
+@Getter
+@RequiredArgsConstructor
+@EqualsAndHashCode(doNotUseGetters = true)
 public class Result<V, E> {
     private final V value;
     private final E error;
@@ -23,18 +31,12 @@ public class Result<V, E> {
         return new Result<>(null, error, ResultStatus.FAIL);
     }
 
-    private Result(V value, E error, ResultStatus success) {
-        this.value = value;
-        this.error = error;
-        this.status = success;
-    }
-
-    public ResultStatus getStatus() {
-        return status;
-    }
-
     public boolean isSuccess() {
         return status.isSuccess();
+    }
+
+    public boolean hasFailed() {
+        return !status.isSuccess();
     }
 
     public V getValue() {
@@ -67,6 +69,16 @@ public class Result<V, E> {
         }
     }
 
+    public <U, X> Result<U, X> map(Function<V, U> valueMapper, Function<E, X> errorMapper) {
+        switch (status) {
+            case SUCCESS:
+                return Result.ok(valueMapper.apply(value));
+            case FAIL:
+            default:
+                return Result.err(errorMapper.apply(error));
+        }
+    }
+
     public <U, X> Result<U, X> mapValue(Function<V, U> valueMapper) {
         switch (status) {
             case SUCCESS:
@@ -77,6 +89,22 @@ public class Result<V, E> {
         }
     }
 
+    public <U, X> Result<U, X> mapResult(Function<Result<V, E>, Result<U, X>> valueMapper) {
+        return valueMapper.apply(this);
+    }
+
+    public <U, X> Result<U, X> mapValueToError(Function<V, X> valueToErrorMapper) {
+        return Result.err(valueToErrorMapper.apply(value));
+    }
+
+    /**
+     * Creates a new Result with a new Error.
+     *
+     * @param errorMapper creates a new Error from the existing one.
+     * @return the new Status
+     * @param <U>
+     * @param <X>
+     */
     public <U, X> Result<U, X> mapError(Function<E, X> errorMapper) {
         switch (status) {
             case FAIL:
@@ -86,6 +114,7 @@ public class Result<V, E> {
                 throw new IllegalStateException(String.format("Can't map the error of a successful Result. Value was %s", verboseValue()));
         }
     }
+
 
     private String verboseValue() {
         if (value == null)
@@ -99,6 +128,12 @@ public class Result<V, E> {
         return String.format("%s: %s", error.getClass().getSimpleName(), error);
     }
 
+    /**
+     * Retrieve the Error.
+     *
+     * @return the Error
+     * @throws ResultException if the Result is successful.
+     */
     public E getError() {
         switch (status) {
             case FAIL:
@@ -109,16 +144,14 @@ public class Result<V, E> {
         }
     }
 
+    @Getter
     public enum ResultStatus {
-        FAIL, SUCCESS {
-            @Override
-            boolean isSuccess() {
-                return true;
-            }
-        };
+        FAIL(false), SUCCESS(true);
 
-        boolean isSuccess() {
-            return false;
+        private final boolean success;
+
+        ResultStatus(boolean success) {
+            this.success = success;
         }
     }
 
@@ -133,16 +166,5 @@ public class Result<V, E> {
         }
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof Result)) return false;
-        Result<?, ?> result = (Result<?, ?>) o;
-        return Objects.equals(value, result.value) && Objects.equals(error, result.error) && status == result.status;
-    }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(value, error, status);
-    }
 }
