@@ -5,7 +5,7 @@
 
     <groupId>io.github.paxel</groupId>
     <artifactId>group-executor</artifactId>
-    <version>0.10.6-SNAPSHOT</version>
+    <version>0.10.6</version>
     <packaging>bundle</packaging>
 
     <name>Group Executor</name>
@@ -166,7 +166,7 @@
         <connection>scm:git:git://github.com/paxel/group-executor.git</connection>
         <developerConnection>scm:git:git@github.com:paxel/group-executor.git</developerConnection>
         <url>https://github.com/paxel/group-executor.git</url>
-        <tag>HEAD</tag>
+        <tag>group-executor-0.10.6</tag>
     </scm>
 
     <profiles>
