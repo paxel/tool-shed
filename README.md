@@ -6,7 +6,7 @@ To use this small lib you can simply depend it via maven
 <dependency>
     <groupId>io.github.paxel</groupId>
     <artifactId>group-executor</artifactId>
-    <version>0.10.1</version>
+    <version>0.10.7</version>
 </dependency>
 ```
 
