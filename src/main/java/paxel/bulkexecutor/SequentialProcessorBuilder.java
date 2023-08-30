@@ -7,24 +7,6 @@ import java.util.concurrent.ExecutorService;
  */
 public interface SequentialProcessorBuilder {
 
-    /**
-     * If the ProcessorBuilder receives messages from multiple sources, the input needs to be syncronized.
-     * If a builder only receives messages from a single source, set it to false for performance improvement.
-     * Otherwise leave it to the default (true).
-     *
-     * @param multiSource The flag for multi source
-     * @return The builder.
-     */
-    SequentialProcessorBuilder setMultiSource(boolean multiSource);
-
-    /**
-     * The queue limit of the ProcessorBuilder. If set to 0 (default) the queue is unbound.
-     * The limited queue has a better performance, but can lead to dropped messages.
-     *
-     * @param limit The message limit.
-     * @return The builder.
-     */
-    SequentialProcessorBuilder setLimited(int limit);
 
     /**
      * The number of messages that are tried to be processed, before freeing the thread for another processor.
@@ -48,16 +30,6 @@ public interface SequentialProcessorBuilder {
      */
     SequentialProcessorBuilder setErrorHandler(ErrorHandler errorHandler);
 
-    /**
-     * If this is set to true, the processing queue is blocking and will wait until a place in the queue is available for a new message.
-     * This can lead to deadlocks in case processes are communicating with each other.
-     * If this is set to true and the limit is 0, the blocking value is ignored.
-     * <p>
-     * handle with care.
-     *
-     * @return The builder.
-     */
-    SequentialProcessorBuilder setBlocking(boolean blocking);
 
     /**
      * Retrieve the executor service.
@@ -66,26 +38,6 @@ public interface SequentialProcessorBuilder {
      */
     ExecutorService getExecutorService();
 
-    /**
-     * Retrieve the executor service.
-     *
-     * @return the service.
-     */
-    boolean isMultiSource();
-
-    /**
-     * Retrieve the executor service.
-     *
-     * @return the service.
-     */
-    boolean isBlocking();
-
-    /**
-     * Retrieve the queue limit.
-     *
-     * @return the limit.
-     */
-    int getLimit();
 
     /**
      * Retrieve the batch size.

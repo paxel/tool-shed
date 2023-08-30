@@ -11,7 +11,7 @@ import java.util.concurrent.TimeUnit;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 
-public class SingleSourceSequentialProcessorTest {
+public class ConcurrentDequeuSequentialProcessorTest {
 
     private int value;
     private List<Integer> values;
@@ -22,15 +22,15 @@ public class SingleSourceSequentialProcessorTest {
         values = new ArrayList<>();
     }
 
-    private SingleSourceSequentialProcessor p;
+    private ConcurrentDequeSequentialProcessor p;
 
-    public SingleSourceSequentialProcessorTest() {
+    public ConcurrentDequeuSequentialProcessorTest() {
     }
 
     @Test
     public void testExecuteOne() throws InterruptedException {
         final ExecutorService exe = Executors.newFixedThreadPool(4);
-        p = new SingleSourceSequentialProcessor(exe, 1, a -> true, 0, false);
+        p = new ConcurrentDequeSequentialProcessor(exe, 1, a -> true);
 
         p.add(() -> this.value = 1);
 
@@ -43,9 +43,9 @@ public class SingleSourceSequentialProcessorTest {
     @Test
     public void testExecuteOneBlocking() throws InterruptedException {
         final ExecutorService exe = Executors.newFixedThreadPool(4);
-        p = new SingleSourceSequentialProcessor(exe, 1, a -> true, 1, true);
+        p = new ConcurrentDequeSequentialProcessor(exe, 1, a -> true);
 
-        p.add(() -> this.value = 1);
+        p.addWithBackPressure(() -> this.value = 1,1);
 
         waitForProcessingFinish(exe);
 
@@ -56,7 +56,7 @@ public class SingleSourceSequentialProcessorTest {
     @Test
     public void testExecute1000() throws InterruptedException {
         final ExecutorService exe = Executors.newFixedThreadPool(4);
-        p = new SingleSourceSequentialProcessor(exe, 1, a -> true, 0, false);
+        p = new ConcurrentDequeSequentialProcessor(exe, 1, a -> true);
 
         final List<Integer> result = new ArrayList<>();
         for (int i = 0; i < 1000; i++) {
@@ -73,13 +73,13 @@ public class SingleSourceSequentialProcessorTest {
     @Test
     public void testExecute1000Blocking() throws InterruptedException {
         final ExecutorService exe = Executors.newFixedThreadPool(4);
-        p = new SingleSourceSequentialProcessor(exe, 1, a -> true, 1, true);
+        p = new ConcurrentDequeSequentialProcessor(exe, 1, a -> true);
 
         final List<Integer> result = new ArrayList<>();
         for (int i = 0; i < 1000; i++) {
             result.add(i);
             final Integer j = i;
-            p.add(() -> this.values.add(j));
+            p.addWithBackPressure(() -> this.values.add(j),5);
         }
         waitForProcessingFinish(exe);
 
@@ -90,7 +90,7 @@ public class SingleSourceSequentialProcessorTest {
     @Test
     public void testExecute100Interrupted() throws InterruptedException {
         final ExecutorService exe = Executors.newFixedThreadPool(4);
-        p = new SingleSourceSequentialProcessor(exe, 1, a -> true, 0, false);
+        p = new ConcurrentDequeSequentialProcessor(exe, 1, a -> true);
 
         final List<Integer> result = new ArrayList<>();
         for (int i = 0; i < 100; i++) {
@@ -107,13 +107,13 @@ public class SingleSourceSequentialProcessorTest {
     @Test
     public void testExecute100InterruptedBlocking() throws InterruptedException {
         final ExecutorService exe = Executors.newFixedThreadPool(4);
-        p = new SingleSourceSequentialProcessor(exe, 1, a -> true, 1, true);
+        p = new ConcurrentDequeSequentialProcessor(exe, 1, a -> true);
 
         final List<Integer> result = new ArrayList<>();
         for (int i = 0; i < 100; i++) {
             result.add(i);
             final Integer j = i;
-            p.add(() -> this.values.add(j));
+            p.addWithBackPressure(() -> this.values.add(j),5);
             Thread.sleep(1);
         }
         waitForProcessingFinish(exe);

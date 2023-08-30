@@ -91,7 +91,7 @@ public class JmhActorBasedSumTest {
             exe = Executors.newFixedThreadPool(2);
             g = new GroupingExecutor(exe);
             latch = new CountDownLatch(2);
-            a1 = new Actor1(g.create().setMultiSource(true).build(), latch);
+            a1 = new Actor1(g.create().build(), latch);
             a2 = new Actor2(g.create().build(), a1);
             a3 = new Actor3(g.create().build(), a1);
         }
@@ -113,7 +113,7 @@ public class JmhActorBasedSumTest {
             exe = Executors.newFixedThreadPool(3);
             g = new GroupingExecutor(exe);
             latch = new CountDownLatch(2);
-            a1 = new Actor1(g.create().setMultiSource(true).build(), latch);
+            a1 = new Actor1(g.create().build(), latch);
             a2 = new Actor2(g.create().build(), a1);
             a3 = new Actor3(g.create().build(), a1);
         }
@@ -135,9 +135,9 @@ public class JmhActorBasedSumTest {
             exe = Executors.newFixedThreadPool(3);
             g = new GroupingExecutor(exe);
             latch = new CountDownLatch(2);
-            a1 = new Actor1(g.create().setMultiSource(true).build(), latch);
-            a2 = new Actor2(g.create().setMultiSource(true).build(), a1);
-            a3 = new Actor3(g.create().setMultiSource(true).build(), a1);
+            a1 = new Actor1(g.create().build(), latch);
+            a2 = new Actor2(g.create().build(), a1);
+            a3 = new Actor3(g.create().build(), a1);
         }
 
     }
@@ -157,7 +157,7 @@ public class JmhActorBasedSumTest {
             exe = Executors.newFixedThreadPool(1);
             g = new GroupingExecutor(exe);
             latch = new CountDownLatch(2);
-            a1 = new Actor1(g.create().setMultiSource(true).build(), latch);
+            a1 = new Actor1(g.create().build(), latch);
             a2 = new Actor2(g.create().build(), a1);
             a3 = new Actor3(g.create().build(), a1);
         }
@@ -179,7 +179,7 @@ public class JmhActorBasedSumTest {
             exe = Executors.newFixedThreadPool(1);
             g = new GroupingExecutor(exe);
             latch = new CountDownLatch(2);
-            a1 = new Actor1(g.create().setBatchSize(100).setMultiSource(true).build(), latch);
+            a1 = new Actor1(g.create().setBatchSize(100).build(), latch);
             a2 = new Actor2(g.create().setBatchSize(100).build(), a1);
             a3 = new Actor3(g.create().setBatchSize(100).build(), a1);
         }
