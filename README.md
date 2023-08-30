@@ -280,4 +280,86 @@ scenario.
 It must be said, that the ListIterator here is not optimized.
 A dedicated FrankenListIterator will improve this value additionally.
 
-
+## Benchmark results
+```
+Benchmark                                                                  (entries)   Mode  Cnt       Score      Error  Units
+p.bulkexecutor.JmhActorBasedSumTest.runBatch                                     N/A  thrpt    5       1.009 ±    0.007  ops/s
+p.bulkexecutor.JmhActorBasedSumTest.runOneThreadSingleSourceActors               N/A  thrpt    5       1.003 ±    0.009  ops/s
+p.bulkexecutor.JmhActorBasedSumTest.runThreeThreadsSingleSourceActors            N/A  thrpt    5       1.810 ±    0.009  ops/s
+p.bulkexecutor.JmhActorBasedSumTest.runTwoThreadsSingleSourceActors              N/A  thrpt    5       1.808 ±    0.030  ops/s
+p.bulkexecutor.JmhStreamPerformanceMeasurement.collectFilteredFor                 10  thrpt   25  656473.346 ± 2539.758  ops/s
+p.bulkexecutor.JmhStreamPerformanceMeasurement.collectFilteredFor              10000  thrpt   25    4761.892 ±   41.883  ops/s
+p.bulkexecutor.JmhStreamPerformanceMeasurement.collectFilteredFor           10000000  thrpt   25       1.280 ±    0.038  ops/s
+p.bulkexecutor.JmhStreamPerformanceMeasurement.collectFilteredForGet              10  thrpt   25  652660.028 ± 2344.051  ops/s
+p.bulkexecutor.JmhStreamPerformanceMeasurement.collectFilteredForGet           10000  thrpt   25    4696.996 ±   43.071  ops/s
+p.bulkexecutor.JmhStreamPerformanceMeasurement.collectFilteredForGet        10000000  thrpt   25       1.220 ±    0.043  ops/s
+p.bulkexecutor.JmhStreamPerformanceMeasurement.collectFilteredStream              10  thrpt   25  615715.842 ± 2432.973  ops/s
+p.bulkexecutor.JmhStreamPerformanceMeasurement.collectFilteredStream           10000  thrpt   25    5027.059 ±   62.505  ops/s
+p.bulkexecutor.JmhStreamPerformanceMeasurement.collectFilteredStream        10000000  thrpt   25       1.264 ±    0.036  ops/s
+p.bulkexecutor.JmhStreamPerformanceMeasurement.collectFor                         10  thrpt   25  586674.581 ± 2562.389  ops/s
+p.bulkexecutor.JmhStreamPerformanceMeasurement.collectFor                      10000  thrpt   25    1365.258 ±   11.491  ops/s
+p.bulkexecutor.JmhStreamPerformanceMeasurement.collectFor                   10000000  thrpt   25       0.317 ±    0.009  ops/s
+p.bulkexecutor.JmhStreamPerformanceMeasurement.collectForGet                      10  thrpt   25  585120.969 ± 2722.496  ops/s
+p.bulkexecutor.JmhStreamPerformanceMeasurement.collectForGet                   10000  thrpt   25    1344.990 ±    5.318  ops/s
+p.bulkexecutor.JmhStreamPerformanceMeasurement.collectForGet                10000000  thrpt   25       0.321 ±    0.008  ops/s
+p.bulkexecutor.JmhStreamPerformanceMeasurement.collectStream                      10  thrpt   25  566071.217 ± 3468.827  ops/s
+p.bulkexecutor.JmhStreamPerformanceMeasurement.collectStream                   10000  thrpt   25    1349.957 ±   19.733  ops/s
+p.bulkexecutor.JmhStreamPerformanceMeasurement.collectStream                10000000  thrpt   25       0.326 ±    0.006  ops/s
+p.bulkexecutor.JmhStreamPerformanceMeasurement.easyTaskFor                        10  thrpt   25  744888.529 ±  589.249  ops/s
+p.bulkexecutor.JmhStreamPerformanceMeasurement.easyTaskFor                     10000  thrpt   25   39300.740 ±   69.133  ops/s
+p.bulkexecutor.JmhStreamPerformanceMeasurement.easyTaskFor                  10000000  thrpt   25      40.193 ±    0.334  ops/s
+p.bulkexecutor.JmhStreamPerformanceMeasurement.easyTaskForGet                     10  thrpt   25  747063.559 ± 1706.281  ops/s
+p.bulkexecutor.JmhStreamPerformanceMeasurement.easyTaskForGet                  10000  thrpt   25   42382.579 ±   93.797  ops/s
+p.bulkexecutor.JmhStreamPerformanceMeasurement.easyTaskForGet               10000000  thrpt   25      40.607 ±    0.314  ops/s
+p.bulkexecutor.JmhStreamPerformanceMeasurement.easyTaskStream                     10  thrpt   25  723618.424 ± 4771.630  ops/s
+p.bulkexecutor.JmhStreamPerformanceMeasurement.easyTaskStream                  10000  thrpt   25   40415.690 ±  180.454  ops/s
+p.bulkexecutor.JmhStreamPerformanceMeasurement.easyTaskStream               10000000  thrpt   25      40.329 ±    0.295  ops/s
+p.bulkexecutor.JmhStreamPerformanceMeasurement.heavyTaskFor                       10  thrpt   25  705737.175 ±  714.481  ops/s
+p.bulkexecutor.JmhStreamPerformanceMeasurement.heavyTaskFor                    10000  thrpt   25    9322.546 ±   25.508  ops/s
+p.bulkexecutor.JmhStreamPerformanceMeasurement.heavyTaskFor                 10000000  thrpt   25      15.376 ±    0.104  ops/s
+p.bulkexecutor.JmhStreamPerformanceMeasurement.heavyTaskForGet                    10  thrpt   25  701908.881 ±  918.762  ops/s
+p.bulkexecutor.JmhStreamPerformanceMeasurement.heavyTaskForGet                 10000  thrpt   25   14032.623 ±    9.661  ops/s
+p.bulkexecutor.JmhStreamPerformanceMeasurement.heavyTaskForGet              10000000  thrpt   25      14.745 ±    0.091  ops/s
+p.bulkexecutor.JmhStreamPerformanceMeasurement.heavyTaskStream                    10  thrpt   25  696836.642 ±  811.225  ops/s
+p.bulkexecutor.JmhStreamPerformanceMeasurement.heavyTaskStream                 10000  thrpt   25   13400.804 ±   13.761  ops/s
+p.bulkexecutor.JmhStreamPerformanceMeasurement.heavyTaskStream              10000000  thrpt   25      14.716 ±    0.098  ops/s
+p.lib.JmhFrankenListInsertBenchmark.addToArrayListWith_a_125k_Entries            N/A  thrpt   25    9099.352 ±   11.940  ops/s
+p.lib.JmhFrankenListInsertBenchmark.addToArrayListWith_a_250k_Entries            N/A  thrpt   25    4233.407 ±  157.011  ops/s
+p.lib.JmhFrankenListInsertBenchmark.addToArrayListWith_a_500k_Entries            N/A  thrpt   25    1200.570 ±   39.041  ops/s
+p.lib.JmhFrankenListInsertBenchmark.addToArrayListWith_b_1m_Entries              N/A  thrpt   25     699.431 ±   19.313  ops/s
+p.lib.JmhFrankenListInsertBenchmark.addToArrayListWith_c_10m_Entries             N/A  thrpt   25      17.041 ±    1.878  ops/s
+p.lib.JmhFrankenListInsertBenchmark.addToFrankenListWith_a_125k_Entries          N/A  thrpt   25    4949.389 ±   46.911  ops/s
+p.lib.JmhFrankenListInsertBenchmark.addToFrankenListWith_a_250k_Entries          N/A  thrpt   25    4629.170 ±   47.673  ops/s
+p.lib.JmhFrankenListInsertBenchmark.addToFrankenListWith_a_500k_Entries          N/A  thrpt   25    3525.308 ±    7.400  ops/s
+p.lib.JmhFrankenListInsertBenchmark.addToFrankenListWith_b_1m_Entries            N/A  thrpt   25    3003.960 ±   14.893  ops/s
+p.lib.JmhFrankenListInsertBenchmark.addToFrankenListWith_c_10m_Entries           N/A  thrpt   25     408.070 ±   62.804  ops/s
+p.lib.JmhFrankenListInsertBenchmark.addToLinkedListWith_a_125k_Entries           N/A  thrpt   25     139.650 ±    0.835  ops/s
+p.lib.JmhFrankenListInsertBenchmark.addToLinkedListWith_a_250k_Entries           N/A  thrpt   25      59.734 ±    0.507  ops/s
+p.lib.JmhFrankenListInsertBenchmark.addToLinkedListWith_a_500k_Entries           N/A  thrpt   25      28.826 ±    0.476  ops/s
+p.lib.JmhFrankenListInsertBenchmark.addToLinkedListWith_b_1m_Entries             N/A  thrpt   25      13.846 ±    0.161  ops/s
+p.lib.JmhFrankenListInsertBenchmark.addToLinkedListWith_c_10m_Entries            N/A  thrpt   25       0.637 ±    0.031  ops/s
+p.lib.JmhFrankenListIteratorBenchmark.addToArrayListWith_a_125k_Entries          N/A  thrpt   25   27027.683 ±   76.806  ops/s
+p.lib.JmhFrankenListIteratorBenchmark.addToArrayListWith_a_250k_Entries          N/A  thrpt   25    2176.698 ±   60.193  ops/s
+p.lib.JmhFrankenListIteratorBenchmark.addToArrayListWith_a_500k_Entries          N/A  thrpt   25     793.033 ±   14.621  ops/s
+p.lib.JmhFrankenListIteratorBenchmark.addToArrayListWith_b_1m_Entries            N/A  thrpt   25     537.646 ±   12.530  ops/s
+p.lib.JmhFrankenListIteratorBenchmark.addToArrayListWith_c_10m_Entries           N/A  thrpt   25      19.878 ±    1.484  ops/s
+p.lib.JmhFrankenListIteratorBenchmark.addToFrankenListWith_a_125k_Entries        N/A  thrpt   25   74947.718 ±  438.849  ops/s
+p.lib.JmhFrankenListIteratorBenchmark.addToFrankenListWith_a_250k_Entries        N/A  thrpt   25   47483.056 ±  287.671  ops/s
+p.lib.JmhFrankenListIteratorBenchmark.addToFrankenListWith_a_500k_Entries        N/A  thrpt   25   23779.868 ±  136.446  ops/s
+p.lib.JmhFrankenListIteratorBenchmark.addToFrankenListWith_b_1m_Entries          N/A  thrpt   25   13020.950 ±   70.893  ops/s
+p.lib.JmhFrankenListIteratorBenchmark.addToFrankenListWith_c_10m_Entries         N/A  thrpt   25     717.162 ±   15.896  ops/s
+p.lib.JmhFrankenListIteratorBenchmark.addToLinkedListWith_a_125k_Entries         N/A  thrpt   25   13518.301 ±   42.791  ops/s
+p.lib.JmhFrankenListIteratorBenchmark.addToLinkedListWith_a_250k_Entries         N/A  thrpt   25    1731.051 ±    9.098  ops/s
+p.lib.JmhFrankenListIteratorBenchmark.addToLinkedListWith_a_500k_Entries         N/A  thrpt   25    1371.940 ±    6.425  ops/s
+p.lib.JmhFrankenListIteratorBenchmark.addToLinkedListWith_b_1m_Entries           N/A  thrpt   25     497.723 ±    3.428  ops/s
+p.lib.JmhFrankenListIteratorBenchmark.addToLinkedListWith_c_10m_Entries          N/A  thrpt   25      32.712 ±    3.883  ops/s
+p.lib.JmhFrankenListSortBenchmark.sortArrayListWith_a_500k_Entries               N/A  thrpt   25       4.424 ±    0.037  ops/s
+p.lib.JmhFrankenListSortBenchmark.sortArrayListWith_b_1m_Entries                 N/A  thrpt   25       1.903 ±    0.014  ops/s
+p.lib.JmhFrankenListSortBenchmark.sortArrayListWith_c_10m_Entries                N/A  thrpt   25       0.125 ±    0.001  ops/s
+p.lib.JmhFrankenListSortBenchmark.sortFrankenListWith_a_500k_Entries             N/A  thrpt   25       1.978 ±    0.013  ops/s
+p.lib.JmhFrankenListSortBenchmark.sortFrankenListWith_b_1m_Entries               N/A  thrpt   25       0.916 ±    0.008  ops/s
+p.lib.JmhFrankenListSortBenchmark.sortFrankenListWith_c_10m_Entries              N/A  thrpt   25       0.072 ±    0.001  ops/s
+p.lib.JmhFrankenListSortBenchmark.sortLinkedListWith_a_500k_Entries              N/A  thrpt   25       3.758 ±    0.054  ops/s
+p.lib.JmhFrankenListSortBenchmark.sortLinkedListWith_b_1m_Entries                N/A  thrpt   25       1.632 ±    0.024  ops/s
+p.lib.JmhFrankenListSortBenchmark.sortLinkedListWith_c_10m_Entries               N/A  thrpt   25       0.102 ±    0.004  ops/s
+```
