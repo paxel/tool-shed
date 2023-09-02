@@ -1,10 +1,14 @@
 package paxel.bulkexecutor.internal;
 
+import lombok.SneakyThrows;
 import paxel.bulkexecutor.ErrorHandler;
 import paxel.bulkexecutor.RunnableCompleter;
 import paxel.bulkexecutor.SequentialProcessor;
 
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class ConcurrentDequeSequentialProcessor implements SequentialProcessor {
     private static final int IDLE = 0;
@@ -12,6 +16,10 @@ public class ConcurrentDequeSequentialProcessor implements SequentialProcessor {
     private static final int FINISHED = 2;
     private static final int ABORT = 3;
 
+    private final ReentrantLock reentrantLock = new ReentrantLock();
+    private final Condition full = reentrantLock.newCondition();
+
+    private final AtomicInteger backPressure = new AtomicInteger();
     private final ConcurrentLinkedDeque<Runnable> queue;
     private final ExecutorService executorService;
     private final ErrorHandler errorHandler;
@@ -21,8 +29,18 @@ public class ConcurrentDequeSequentialProcessor implements SequentialProcessor {
     public ConcurrentDequeSequentialProcessor(ExecutorService executorService, int batch, ErrorHandler errorHandler) {
         queue = new ConcurrentLinkedDeque<>();
         this.executorService = executorService;
-        this.queueRunner = new QueueBatchRunner(queue, batch);
+        this.queueRunner = new QueueBatchRunner(queue, batch, this::notifyBackPressure);
         this.errorHandler = errorHandler;
+    }
+
+    private void notifyBackPressure() {
+        if (backPressure.get() > 0)
+            try {
+                reentrantLock.lock();
+                full.signalAll();
+            } finally {
+                reentrantLock.unlock();
+            }
     }
 
     /**
@@ -34,24 +52,24 @@ public class ConcurrentDequeSequentialProcessor implements SequentialProcessor {
      */
     @Override
     public boolean add(Runnable r) {
-        return addWithOptionalBackPressue(r, null);
-    }
-    @Override
-    public boolean addWithBackPressure(Runnable runnable, int threshold) {
-        return addWithOptionalBackPressue(runnable, threshold);
+        return addWithOptionalBackPressure(r, null);
     }
 
-    private boolean addWithOptionalBackPressue(Runnable r, Integer threshold) {
+    @Override
+    public boolean addWithBackPressure(Runnable runnable, int threshold) {
+        return addWithOptionalBackPressure(runnable, threshold);
+    }
+
+    @SneakyThrows(InterruptedException.class)
+    private boolean addWithOptionalBackPressure(Runnable r, Integer threshold) {
         if (runStatus == ABORT) {
             // We don't accept any new Runnables.
             return false;
         }
         // first we try to put the runnable in the queue
 
-        if (threshold!=null){
-            while(queue.size()>threshold){
-
-            }
+        if (threshold != null) {
+            awaitQueueSize(threshold);
         }
         boolean offer = queue.offer(r);
         // local copy to prevent changes in between.
@@ -95,6 +113,19 @@ public class ConcurrentDequeSequentialProcessor implements SequentialProcessor {
             }
         }
         return false;
+    }
+
+    private void awaitQueueSize(Integer threshold) throws InterruptedException {
+        try {
+            backPressure.incrementAndGet();
+            reentrantLock.lock();
+            while (queue.size() > threshold) {
+                full.await();
+            }
+        } finally {
+            reentrantLock.unlock();
+            backPressure.decrementAndGet();
+        }
     }
 
 
