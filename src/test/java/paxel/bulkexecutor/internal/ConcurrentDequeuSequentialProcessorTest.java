@@ -44,9 +44,16 @@ public class ConcurrentDequeuSequentialProcessorTest {
     public void testExecuteOneBlocking() throws InterruptedException {
         final ExecutorService exe = Executors.newFixedThreadPool(4);
         p = new ConcurrentDequeSequentialProcessor(exe, 1, a -> true);
-
+        for (int i = 0; i < 1000; i++) {
+            p.add(()->{
+                try {
+                    Thread.sleep(2);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+            });
+        }
         p.addWithBackPressure(() -> this.value = 1,1);
-
         waitForProcessingFinish(exe);
 
         assertThat(value, is(1));

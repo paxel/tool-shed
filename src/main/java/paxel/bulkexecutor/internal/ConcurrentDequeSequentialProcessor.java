@@ -34,13 +34,13 @@ public class ConcurrentDequeSequentialProcessor implements SequentialProcessor {
     }
 
     private void notifyBackPressure() {
-        if (backPressure.get() > 0)
-            try {
-                reentrantLock.lock();
+        try {
+            reentrantLock.lock();
+            if (backPressure.get() > 0)
                 full.signalAll();
-            } finally {
-                reentrantLock.unlock();
-            }
+        } finally {
+            reentrantLock.unlock();
+        }
     }
 
     /**
@@ -117,14 +117,14 @@ public class ConcurrentDequeSequentialProcessor implements SequentialProcessor {
 
     private void awaitQueueSize(Integer threshold) throws InterruptedException {
         try {
-            backPressure.incrementAndGet();
             reentrantLock.lock();
+            backPressure.incrementAndGet();
             while (queue.size() > threshold) {
                 full.await();
             }
         } finally {
-            reentrantLock.unlock();
             backPressure.decrementAndGet();
+            reentrantLock.unlock();
         }
     }
 
