@@ -63,7 +63,7 @@ public class ConcurrentDequeSequentialProcessor implements SequentialProcessor {
     @SneakyThrows(InterruptedException.class)
     private boolean addWithOptionalBackPressure(Runnable r, Integer threshold) {
         if (runStatus == ABORT) {
-            // We don't accept any new Runnables.
+            // We don't accept any new Runnable.
             return false;
         }
         // first we try to put the runnable in the queue
@@ -71,48 +71,55 @@ public class ConcurrentDequeSequentialProcessor implements SequentialProcessor {
         if (threshold != null) {
             awaitQueueSize(threshold);
         }
-        boolean offer = queue.offer(r);
-        // local copy to prevent changes in between.
-        int runStatusAfterAfterOffer = this.runStatus;
-        if (offer) {
-            for (; ; ) {
-                switch (runStatusAfterAfterOffer) {
-                    case IDLE: {
-                        /**
-                         * There is currently no QueueRunner active for this
-                         * Processor. We change the status and submit a QueueRunner.
-                         */
-                        this.runStatus = QUEUED;
-                        CompletableFuture<Void> future = new CompletableFuture<>();
-                        // when the QueueRunner is finished, the finished method will be executed.
-                        // adding the handle method before the submit makes sure the fiinished method is
-                        // always called by the executor framework
-                        future.handle((a, b) -> finished(b));
-                        executorService.submit(new RunnableCompleter(queueRunner, future));
-                        return true;
-                    }
-                    case QUEUED: {
-                        /**
-                         * There is currently a QueueRunner active.
-                         * Either it already has grabbed our runnable or it will
-                         * after it has finished.
-                         */
-                        return true;
-                    }
-                    case ABORT: {
-                        // we don't accept any new jobs
-                        queue.clear();
-                        return false;
-                    }
-                    case FINISHED:
-                    default: {
-                        // busy loop. the QueueRunner just finished and has to decide on the runStatus
-                        runStatusAfterAfterOffer = this.runStatus;
+        try {
+            // in case two sources add messages concurrently we must make sure the status is always correct
+            // otherwise we could have a state where messages are queued, but no runner active
+            reentrantLock.lock();
+            boolean offer = queue.offer(r);
+            // local copy to prevent changes in between.
+            int runStatusAfterAfterOffer = this.runStatus;
+            if (offer) {
+                for (; ; ) {
+                    switch (runStatusAfterAfterOffer) {
+                        case IDLE: {
+                            /*
+                             * There is currently no QueueRunner active for this
+                             * Processor. We change the status and submit a QueueRunner.
+                             */
+                            this.runStatus = QUEUED;
+                            CompletableFuture<Void> future = new CompletableFuture<>();
+                            // when the QueueRunner is finished, the finished method will be executed.
+                            // adding the handle method before the submit makes sure the finished method is
+                            // always called by the executor framework
+                            future.handle((a, b) -> finished(b));
+                            executorService.submit(new RunnableCompleter(queueRunner, future));
+                            return true;
+                        }
+                        case QUEUED: {
+                            /*
+                             * There is currently a QueueRunner active.
+                             * Either it already has grabbed our runnable or it will
+                             * after it has finished.
+                             */
+                            return true;
+                        }
+                        case ABORT: {
+                            // we don't accept any new jobs
+                            queue.clear();
+                            return false;
+                        }
+                        case FINISHED:
+                        default: {
+                            // busy loop. the QueueRunner just finished and has to decide on the runStatus
+                            runStatusAfterAfterOffer = this.runStatus;
+                        }
                     }
                 }
             }
+            return false;
+        } finally {
+            reentrantLock.unlock();
         }
-        return false;
     }
 
     private void awaitQueueSize(Integer threshold) throws InterruptedException {
@@ -152,30 +159,35 @@ public class ConcurrentDequeSequentialProcessor implements SequentialProcessor {
     }
 
     private Void finished(Throwable ex) {
-        // we mark that we are finished and have to decide what we do next.
-        runStatus = FINISHED;
-        if (ex != null && !errorHandler.check(ex)) {
-            // The errorhandler aborts processing. we clear the queue and set on abort to
-            // avoid accepting new jobs
-            this.runStatus = ABORT;
-            queue.clear();
+        try {
+            reentrantLock.lock();
+            // we mark that we are finished and have to decide what we do next.
+            runStatus = FINISHED;
+            if (ex != null && !errorHandler.check(ex)) {
+                // The errorhandler aborts processing. we clear the queue and set on abort to
+                // avoid accepting new jobs
+                this.runStatus = ABORT;
+                queue.clear();
+                return null;
+            }
+            // the job has finished (successfully). If something is still in the queue, we
+            // enqueue a new QueueRunner.
+            if (!queue.isEmpty()) {
+                // mark queued after check
+                runStatus = QUEUED;
+                // we submit the QueueRunner again.
+                CompletableFuture<Void> future = new CompletableFuture<>();
+                executorService.submit(new RunnableCompleter(queueRunner, future));
+                // and will go back into the finished method when it completes
+                future.handle((a, b) -> finished(b));
+            } else {
+                // nothing to do. we go idle.
+                this.runStatus = IDLE;
+            }
             return null;
+        } finally {
+            reentrantLock.unlock();
         }
-        // the job has finished (successfully). If something is still in the queue, we
-        // enqueue a new QueueRunner.
-        if (!queue.isEmpty()) {
-            // mark queued after check
-            runStatus = QUEUED;
-            // we submit the QueueRunner again.
-            CompletableFuture<Void> future = new CompletableFuture<>();
-            executorService.submit(new RunnableCompleter(queueRunner, future));
-            // and will go back into the finished method when it completes
-            future.handle((a, b) -> finished(b));
-        } else {
-            // nothing to do. we go idle.
-            this.runStatus = IDLE;
-        }
-        return null;
     }
 
 }
