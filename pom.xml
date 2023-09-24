@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>io.github.paxel</groupId>
-    <artifactId>group-executor</artifactId>
+    <artifactId>group-executor-java8</artifactId>
     <version>0.11.3-SNAPSHOT</version>
     <packaging>bundle</packaging>
 
