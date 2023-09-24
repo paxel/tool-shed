@@ -10,6 +10,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
+@SuppressWarnings("BusyWait")
 public class ConcurrentDequeSequentialProcessor implements SequentialProcessor {
     private static final int IDLE = 0;
     private static final int QUEUED = 1;
@@ -48,11 +49,10 @@ public class ConcurrentDequeSequentialProcessor implements SequentialProcessor {
      * successful or false if the Queue is full or the Processor was aborted.
      *
      * @param r the new Runnable.
-     * @return true if successful.
      */
     @Override
-    public boolean add(Runnable r) {
-        return addWithOptionalBackPressure(r, null);
+    public void add(Runnable r) {
+        addWithOptionalBackPressure(r, null);
     }
 
     @Override
@@ -66,13 +66,13 @@ public class ConcurrentDequeSequentialProcessor implements SequentialProcessor {
             // We don't accept any new Runnable.
             return false;
         }
-        // first we try to put the runnable in the queue
+        // first, we try to put the runnable in the queue
 
         if (threshold != null) {
             awaitQueueSize(threshold);
         }
         try {
-            // in case two sources add messages concurrently we must make sure the status is always correct
+            // in case two sources add messages concurrently, we must make sure the status is always correct
             // otherwise we could have a state where messages are queued, but no runner active
             reentrantLock.lock();
             boolean offer = queue.offer(r);
@@ -89,7 +89,7 @@ public class ConcurrentDequeSequentialProcessor implements SequentialProcessor {
                             this.runStatus = QUEUED;
                             CompletableFuture<Void> future = new CompletableFuture<>();
                             // when the QueueRunner is finished, the finished method will be executed.
-                            // adding the handle method before the submit makes sure the finished method is
+                            // adding the handle method before the submission makes sure the finished method is
                             // always called by the executor framework
                             future.handle((a, b) -> finished(b));
                             executorService.submit(new RunnableCompleter(queueRunner, future));
@@ -164,14 +164,17 @@ public class ConcurrentDequeSequentialProcessor implements SequentialProcessor {
             // we mark that we are finished and have to decide what we do next.
             runStatus = FINISHED;
             if (ex != null && !errorHandler.check(ex)) {
-                // The errorhandler aborts processing. we clear the queue and set on abort to
+                // The errorhandler aborts processing.
+                // We clear the queue and set on abort to
                 // avoid accepting new jobs
                 this.runStatus = ABORT;
                 queue.clear();
                 return null;
             }
-            // the job has finished (successfully). If something is still in the queue, we
-            // enqueue a new QueueRunner.
+            /*
+             The job has finished (successfully).
+             If something is still in the queue, we enqueue a new QueueRunner.
+            */
             if (!queue.isEmpty()) {
                 // mark queued after check
                 runStatus = QUEUED;

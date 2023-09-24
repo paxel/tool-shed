@@ -5,15 +5,15 @@ import java.util.*;
 /**
  * The FrankenList combines an ArrayList and multiple LinkedLists to allow quick
  * navigation to a limited sized linked list and fast add/remove inside that
- * linked list. As a result this list is exceptional faster than either Array or
+ * linked list. As a result, this list is exceptionally faster than either Array or
  * LinkedList for big amounts of data. When elements are inserted to the
- * FrankenList (read: not at the end) the the new element is always added to a
- * LinkedList which is very fast. In case this LinkedList reaches the
+ * FrankenList (read: not at the end) the new element is always added to a
+ * LinkedList, which is very fast. In case this LinkedList reaches the
  * sectionSizeLimit, it is split in half and the lower half is inserted into the
  * ArrayList containing the sections. This is quite slow, but depending on the
  * size of the sections quite rare. Additionally, all sections behind the
  * LinkedList get their global start index incremented. Searching an element in
- * the FrankenList is searching the correct section in the ArrayList which is
+ * the FrankenList is searching the correct section in the ArrayList, which is
  * fast because random access and then navigating in the small LinkedList to the
  * correct position. This is quite slow.
  * <p>
@@ -106,7 +106,7 @@ public class FrankenList<E> extends AbstractList<E> implements RandomAccess {
     public void sort(Comparator<? super E> c) {
         int expected = super.modCount;
         Object[] a = this.toArray();
-        Arrays.sort(a, (Comparator) c);
+        Arrays.sort(a);
         if (super.modCount != expected) {
             throw new ConcurrentModificationException("modified while sorting: sort aborted.");
         }
@@ -252,8 +252,8 @@ public class FrankenList<E> extends AbstractList<E> implements RandomAccess {
 
         private F dec(F removeResult, int currentIndex) {
             if (removeResult != null) {
-                // we removed an element, so the indices behind the bucket needs to be
-                // decemented
+                // we removed an element, so the indices behind the bucket need to be
+                // decremented
                 for (int j = currentIndex + 1; j < sections.size(); j++) {
                     sections.get(j).dec();
                 }
@@ -287,7 +287,7 @@ public class FrankenList<E> extends AbstractList<E> implements RandomAccess {
                 LinkedListSection<F> test = sections.get(guessedIndex);
                 if (test.globalSectionStartIndex <= index) {
                     if (guessedIndex == lastBucket) {
-                        // its in/behind the last one
+                        // it's in/behind the last one
                         return guessedIndex;
                     }
                     if (sections.get(guessedIndex + 1).globalSectionStartIndex > index) {
@@ -371,17 +371,17 @@ public class FrankenList<E> extends AbstractList<E> implements RandomAccess {
                 globalSectionStartIndex--;
             }
 
-            private void split(ArrayList<LinkedListSection<G>> rootList, int splittedNodeIndex) {
+            private void split(ArrayList<LinkedListSection<G>> rootList, int splitNodeIndex) {
                 final int nextIndex = sectionSizeLimit / 2;
                 LinkedListSection<G> nextNode = new LinkedListSection<>(this.globalSectionStartIndex + nextIndex);
                 // move the end of the list to a new bucket
                 List<G> subList = values.subList(nextIndex, values.size());
-                // add lower part to new bucket
+                // add lower part to the new bucket
                 nextNode.values.addAll(subList);
                 // delete lower part in previous bucket
                 subList.clear();
 
-                rootList.add(splittedNodeIndex + 1, nextNode);
+                rootList.add(splitNodeIndex + 1, nextNode);
             }
 
             @Override

@@ -1,5 +1,6 @@
 package paxel.bulkexecutor;
 
+import lombok.Getter;
 import org.junit.Test;
 import org.openjdk.jmh.annotations.*;
 import org.openjdk.jmh.runner.Runner;
@@ -14,11 +15,12 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 // only fork 1 JVM per benchmark
+@SuppressWarnings("ResultOfMethodCallIgnored")
 @Fork(1)
-// 5 times 2 second warmup per benchmark
-@Warmup(iterations = 5, time = 2, timeUnit = TimeUnit.SECONDS)
-// 5 times 2 second measurement per benchmark
-@Measurement(iterations = 5, time = 2, timeUnit = TimeUnit.SECONDS)
+// Five times 2 second warmup per benchmark
+@Warmup(iterations = 5, time = 2)
+// Five times 2 second measurement per benchmark
+@Measurement(iterations = 5, time = 2)
 // in micros
 @OutputTimeUnit(TimeUnit.SECONDS)
 public class JmhActorBasedSumTest {
@@ -80,7 +82,6 @@ public class JmhActorBasedSumTest {
     public static class DataProvider2 {
 
         private ExecutorService exe;
-        private GroupingExecutor g;
         private Actor1 a1;
         private Actor2 a2;
         private Actor3 a3;
@@ -89,7 +90,7 @@ public class JmhActorBasedSumTest {
         @Setup(Level.Invocation)
         public void init() {
             exe = Executors.newFixedThreadPool(2);
-            g = new GroupingExecutor(exe);
+            GroupingExecutor g = new GroupingExecutor(exe);
             latch = new CountDownLatch(2);
             a1 = new Actor1(g.create().build(), latch);
             a2 = new Actor2(g.create().build(), a1);
@@ -102,7 +103,6 @@ public class JmhActorBasedSumTest {
     public static class DataProvider3 {
 
         private ExecutorService exe;
-        private GroupingExecutor g;
         private Actor1 a1;
         private Actor2 a2;
         private Actor3 a3;
@@ -111,7 +111,7 @@ public class JmhActorBasedSumTest {
         @Setup(Level.Invocation)
         public void init() {
             exe = Executors.newFixedThreadPool(3);
-            g = new GroupingExecutor(exe);
+            GroupingExecutor g = new GroupingExecutor(exe);
             latch = new CountDownLatch(2);
             a1 = new Actor1(g.create().build(), latch);
             a2 = new Actor2(g.create().build(), a1);
@@ -124,7 +124,6 @@ public class JmhActorBasedSumTest {
     public static class DataProvider3_2 {
 
         private ExecutorService exe;
-        private GroupingExecutor g;
         private Actor1 a1;
         private Actor2 a2;
         private Actor3 a3;
@@ -133,7 +132,7 @@ public class JmhActorBasedSumTest {
         @Setup(Level.Invocation)
         public void init() {
             exe = Executors.newFixedThreadPool(3);
-            g = new GroupingExecutor(exe);
+            GroupingExecutor g = new GroupingExecutor(exe);
             latch = new CountDownLatch(2);
             a1 = new Actor1(g.create().build(), latch);
             a2 = new Actor2(g.create().build(), a1);
@@ -146,7 +145,6 @@ public class JmhActorBasedSumTest {
     public static class DataProvider1 {
 
         private ExecutorService exe;
-        private GroupingExecutor g;
         private Actor1 a1;
         private Actor2 a2;
         private Actor3 a3;
@@ -155,7 +153,7 @@ public class JmhActorBasedSumTest {
         @Setup(Level.Invocation)
         public void init() {
             exe = Executors.newFixedThreadPool(1);
-            g = new GroupingExecutor(exe);
+            GroupingExecutor g = new GroupingExecutor(exe);
             latch = new CountDownLatch(2);
             a1 = new Actor1(g.create().build(), latch);
             a2 = new Actor2(g.create().build(), a1);
@@ -168,7 +166,6 @@ public class JmhActorBasedSumTest {
     public static class DataProviderBatch {
 
         private ExecutorService exe;
-        private GroupingExecutor g;
         private Actor1 a1;
         private Actor2 a2;
         private Actor3 a3;
@@ -177,7 +174,7 @@ public class JmhActorBasedSumTest {
         @Setup(Level.Invocation)
         public void init() {
             exe = Executors.newFixedThreadPool(1);
-            g = new GroupingExecutor(exe);
+            GroupingExecutor g = new GroupingExecutor(exe);
             latch = new CountDownLatch(2);
             a1 = new Actor1(g.create().setBatchSize(100).build(), latch);
             a2 = new Actor2(g.create().setBatchSize(100).build(), a1);
@@ -186,8 +183,10 @@ public class JmhActorBasedSumTest {
 
     }
 
+    @SuppressWarnings("ClassEscapesDefinedScope")
     public static class Actor1 {
 
+        @Getter
         private long result;
 
         private final SequentialProcessor createSingleSourceSequentialProcessor;
@@ -199,28 +198,21 @@ public class JmhActorBasedSumTest {
         }
 
         public void tell(ShutDown a) {
-            createSingleSourceSequentialProcessor.add(() -> {
-                latch.countDown();
-            });
+            createSingleSourceSequentialProcessor.add(latch::countDown);
         }
 
         public void tell(byte[] a) {
-            createSingleSourceSequentialProcessor.add(() -> {
-                result += a.length;
-            });
-        }
-
-        public long getResult() {
-            return result;
+            createSingleSourceSequentialProcessor.add(() -> result += a.length);
         }
 
     }
 
+    @SuppressWarnings("ClassEscapesDefinedScope")
     public static class Actor2 {
 
         private final SequentialProcessor createSingleSourceSequentialProcessor;
         private final Actor1 a1;
-        Random r = new Random(100);
+        final Random r = new Random(100);
 
         private Actor2(SequentialProcessor createSingleSourceSequentialProcessor, Actor1 a1) {
             this.createSingleSourceSequentialProcessor = createSingleSourceSequentialProcessor;
@@ -241,17 +233,16 @@ public class JmhActorBasedSumTest {
         }
 
         public void tell(ShutDown a) {
-            createSingleSourceSequentialProcessor.add(() -> {
-                a1.tell(a);
-            });
+            createSingleSourceSequentialProcessor.add(() -> a1.tell(a));
         }
     }
 
+    @SuppressWarnings("ClassEscapesDefinedScope")
     public static class Actor3 {
 
         private final SequentialProcessor createSingleSourceSequentialProcessor;
         private final Actor1 a1;
-        Random r = new Random(1000);
+        final Random r = new Random(1000);
 
         private Actor3(SequentialProcessor createSingleSourceSequentialProcessor, Actor1 a1) {
             this.createSingleSourceSequentialProcessor = createSingleSourceSequentialProcessor;
@@ -272,9 +263,7 @@ public class JmhActorBasedSumTest {
         }
 
         public void tell(ShutDown a) {
-            createSingleSourceSequentialProcessor.add(() -> {
-                a1.tell(a);
-            });
+            createSingleSourceSequentialProcessor.add(() -> a1.tell(a));
         }
     }
 

@@ -1,12 +1,14 @@
 # mvn dependency
 
-To use this small lib you can simply depend it via maven
+To use this small lib you can simply add it via maven
+
+NOTE: This version is not compatible with JAVA 8~~~~
 
 ```xml
 <dependency>
     <groupId>io.github.paxel</groupId>
-    <artifactId>group-executor</artifactId>
-    <version>0.11.1</version>
+    <artifactId>group-executor-java11</artifactId>
+    <version><!-- See release page --></version>
 </dependency>
 ```
 

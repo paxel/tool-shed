@@ -2,7 +2,6 @@ package paxel.lib;
 
 import org.hamcrest.core.IsNull;
 import org.junit.Test;
-import paxel.lib.ExecutorCompletionService;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.Executors;
@@ -20,24 +19,18 @@ public class ExecutorCompletionServiceTest {
         completionService.submit(() -> "Test").thenAccept(s -> assertThat(s, is("Test")));
 
         // the future provides null of a successful Runnable
-        completionService.submit(new Runnable() {
-            @Override
-            public void run() {
-                // do nothing
-            }
+        completionService.submit(() -> {
+            // do nothing
         }).thenAccept(s -> assertThat(s, is(IsNull.nullValue())));
 
         // the future provides the result given after a successful runnable run
-        completionService.submit(new Runnable() {
-            @Override
-            public void run() {
-                // do nothing
-            }
+        completionService.submit(() -> {
+            // do nothing
         }, "Test").thenAccept(s -> assertThat(s, is("Test")));
     }
 
     @Test
-    public void testFailRunable() {
+    public void testFailRunnable() {
         ExecutorCompletionService completionService = new ExecutorCompletionService(Executors.newFixedThreadPool(1));
         // the Runnable throws an exception, that is verified and converted.
         completionService.submit(() -> {

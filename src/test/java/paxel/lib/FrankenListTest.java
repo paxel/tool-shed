@@ -63,7 +63,7 @@ public class FrankenListTest {
         }
 
         for (int i = 0; i < fl.size(); i++) {
-            // test the inverseness
+            // test the order
             Long next = fl.get(max - 1 - i);
             assertThat(next, is((long) i));
         }

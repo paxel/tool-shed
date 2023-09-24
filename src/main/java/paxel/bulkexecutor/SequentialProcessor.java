@@ -7,9 +7,9 @@ package paxel.bulkexecutor;
  * <p>
  * This works basically like this: The SequentialProcessor enqueues a job to a
  * central Executor, as soon as it gets a Runnable added. When more runnables
- * are added, they go to a queue, if there is already a job active. When the job
+ * are added, they go to a queue if there is already a job active. When the job
  * finishes, it checks if there are more runnables, and the limit is not
- * reached, and processes them immediately. Otherwise it creates a new job, and
+ * reached, and processes them immediately. Otherwise, it creates a new job, and
  * enqueues it to the central executor, giving possible other Processors
  * processing time. If there are no Runnables, the processor does not use any
  * CPU cycles.
@@ -20,16 +20,15 @@ public interface SequentialProcessor {
      * Adds a new Runnable to the processing queue.
      *
      * @param r The new runnable
-     * @return true if the runnable was accepted.
      */
-    boolean add(Runnable r);
+    void add(Runnable r);
 
     /**
      * Adds a new Runnable to the processing queue. But blocks until the queue size is less than the given queueSize.
-     * If multiple Sources try to add with backPressure it is not guaranteed that they are handled in the same order as they started waiting.
+     * If multiple Sources try to add with backPressure, it is not guaranteed that they are handled in the same order as they started waiting.
      *
      * @param runnable  The new runnable
-     * @param threshold The maximum amount of elements in the queue.
+     * @param threshold The maximum number of elements in the queue.
      * @return true if the runnable was accepted.
      */
     boolean addWithBackPressure(Runnable runnable, int threshold);
@@ -51,7 +50,7 @@ public interface SequentialProcessor {
     void awaitFinish() throws InterruptedException;
 
     /**
-     * The Processor was aborted bcause a Runnable threw a Throwable and the
+     * The Processor was aborted bcause a Runnable threw a Throwable, and the
      * ErrorHandler decided to abort the process. The remaining Runnables were
      * removed from the queue.
      *

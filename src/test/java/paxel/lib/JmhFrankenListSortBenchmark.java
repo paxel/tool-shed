@@ -15,62 +15,62 @@ import org.openjdk.jmh.runner.options.OptionsBuilder;
 public class JmhFrankenListSortBenchmark {
 
     @Benchmark
-    public void sortFrankenListWith_a_500k_Entries(FrankenDataProvider500k prov, Blackhole bh) throws InterruptedException {
+    public void sortFrankenListWith_a_500k_Entries(FrankenDataProvider500k prov, Blackhole bh) {
         Collections.sort(prov.unsortedNewValues);
         bh.consume(prov.unsortedNewValues);
     }
 
     @Benchmark
-    public void sortLinkedListWith_a_500k_Entries(LinkedListDataProvider500k prov, Blackhole bh) throws InterruptedException {
+    public void sortLinkedListWith_a_500k_Entries(LinkedListDataProvider500k prov, Blackhole bh) {
         final List<Long> unsortedNewValues = prov.unsortedNewValues;
         Collections.sort(unsortedNewValues);
         bh.consume(prov.unsortedNewValues);
     }
 
     @Benchmark
-    public void sortArrayListWith_a_500k_Entries(ArrayListDataProvider500k prov, Blackhole bh) throws InterruptedException {
+    public void sortArrayListWith_a_500k_Entries(ArrayListDataProvider500k prov, Blackhole bh) {
         final List<Long> unsortedNewValues = prov.unsortedNewValues;
         Collections.sort(unsortedNewValues);
         bh.consume(prov.unsortedNewValues);
     }
 
     @Benchmark
-    public void sortFrankenListWith_b_1m_Entries(FrankenDataProvider prov, Blackhole bh) throws InterruptedException {
+    public void sortFrankenListWith_b_1m_Entries(FrankenDataProvider prov, Blackhole bh) {
         final List<Long> unsortedNewValues = prov.unsortedNewValues;
         Collections.sort(unsortedNewValues);
         bh.consume(prov.unsortedNewValues);
     }
 
     @Benchmark
-    public void sortLinkedListWith_b_1m_Entries(LinkedListDataProvider prov, Blackhole bh) throws InterruptedException {
+    public void sortLinkedListWith_b_1m_Entries(LinkedListDataProvider prov, Blackhole bh) {
         final List<Long> unsortedNewValues = prov.unsortedNewValues;
         Collections.sort(unsortedNewValues);
         bh.consume(prov.unsortedNewValues);
     }
 
     @Benchmark
-    public void sortArrayListWith_b_1m_Entries(ArrayListDataProvider prov, Blackhole bh) throws InterruptedException {
+    public void sortArrayListWith_b_1m_Entries(ArrayListDataProvider prov, Blackhole bh) {
         final List<Long> unsortedNewValues = prov.unsortedNewValues;
         Collections.sort(unsortedNewValues);
         bh.consume(prov.unsortedNewValues);
     }
 
     @Benchmark
-    public void sortFrankenListWith_c_10m_Entries(FrankenDataProvider10m prov, Blackhole bh) throws InterruptedException {
+    public void sortFrankenListWith_c_10m_Entries(FrankenDataProvider10m prov, Blackhole bh) {
         final List<Long> unsortedNewValues = prov.unsortedNewValues;
         Collections.sort(unsortedNewValues);
         bh.consume(prov.unsortedNewValues);
     }
 
     @Benchmark
-    public void sortLinkedListWith_c_10m_Entries(LinkedListDataProvider10m prov, Blackhole bh) throws InterruptedException {
+    public void sortLinkedListWith_c_10m_Entries(LinkedListDataProvider10m prov, Blackhole bh) {
         final List<Long> unsortedNewValues = prov.unsortedNewValues;
         Collections.sort(unsortedNewValues);
         bh.consume(prov.unsortedNewValues);
     }
 
     @Benchmark
-    public void sortArrayListWith_c_10m_Entries(ArrayListDataProvider10m prov, Blackhole bh) throws InterruptedException {
+    public void sortArrayListWith_c_10m_Entries(ArrayListDataProvider10m prov, Blackhole bh) {
         final List<Long> unsortedNewValues = prov.unsortedNewValues;
         Collections.sort(unsortedNewValues);
         bh.consume(prov.unsortedNewValues);

@@ -39,7 +39,7 @@ public class JmhStreamPerformanceMeasurement {
 
     @Benchmark
     public void collectStream(Blackhole bh, DataProvider data) {
-        Set<Long> collect = data.unsortedNewValues.stream().collect(Collectors.toSet());
+        Set<Long> collect = new HashSet<>(data.unsortedNewValues);
         bh.consume(collect);
     }
 
@@ -120,7 +120,7 @@ public class JmhStreamPerformanceMeasurement {
         @Param({"10", "10000", "10000000"})
         int entries;
 
-        Random r = new Random(100);
+        final Random r = new Random(100);
 
         List<Long> unsortedNewValues;
 

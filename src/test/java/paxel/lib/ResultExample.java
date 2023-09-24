@@ -4,30 +4,31 @@ import java.io.IOException;
 import java.util.Objects;
 import java.util.Random;
 
+@SuppressWarnings("ClassEscapesDefinedScope")
 public class ResultExample {
 
-    Random todaysEvents = new Random();
-    boolean loggedIn = todaysEvents.nextBoolean();
-    boolean networkReachable = todaysEvents.nextBoolean();
-    boolean serverUp = todaysEvents.nextBoolean();
-    boolean userExpired = todaysEvents.nextBoolean();
-    boolean nameIsFound = todaysEvents.nextBoolean();
-    boolean addressIsFound = todaysEvents.nextBoolean();
-    boolean licensePlateIsFound = todaysEvents.nextBoolean();
-    boolean networkCrash = todaysEvents.nextBoolean();
-    boolean bugInServer = todaysEvents.nextBoolean();
-    boolean alienAttack = todaysEvents.nextBoolean();
+    final Random todaysEvents = new Random();
+    final boolean loggedIn = todaysEvents.nextBoolean();
+    final boolean networkReachable = todaysEvents.nextBoolean();
+    final boolean serverUp = todaysEvents.nextBoolean();
+    final boolean userExpired = todaysEvents.nextBoolean();
+    final boolean nameIsFound = todaysEvents.nextBoolean();
+    final boolean addressIsFound = todaysEvents.nextBoolean();
+    final boolean licensePlateIsFound = todaysEvents.nextBoolean();
+    final boolean networkCrash = todaysEvents.nextBoolean();
+    final boolean bugInServer = todaysEvents.nextBoolean();
+    final boolean alienAttack = todaysEvents.nextBoolean();
 
     /**
-     * Example for Result in a non trivial mock method.
+     * Example for Result in a non-trivial mock method.
      * The method calls a REST service to get the ID of a user.
-     * The parameters are fuzzy filled fullName, address and licensePlate.
+     * The parameters are fuzzy filled fullName, address, and licensePlate.
      * That can be either empty, valid or unknown.
      * The server can be down.
      * The auth can be expired.
-     * The network disconnected etc.
+     * The network disconnected, etc.
      * <p>
-     * The users only interest is the ID and where it's from or why he couldn't get it.
+     * The users' only interest is the ID and where it's from or why he couldn't get it.
      *
      * @param fullName the full name of the requested person
      * @param address the address of the requested person
@@ -38,13 +39,13 @@ public class ResultExample {
         // we start by making sure that the rest service is reachable and we're connected
         Result<Boolean, IOException> login = checkLoginToRestService();
         if (!login.isSuccess())
-            // we map the reason to a more descriptive reason. We could just keep the original IOException, but the caller
-            // doesn't necessary know something about DNS addresses. He wants and ID and doesn't know we have to get that from
-            // the network, so we tell him
+            // We map the reason to a more descriptive reason.
+            // We could just keep the original IOException, but the caller doesn't necessary know something about DNS addresses.
+            // He wants an ID and doesn't know we have to get that from the network, so we tell him
             return login.mapError(e -> new IOException("Could not login to ID Server", e));
 
         if (!login.getValue())
-            // we got a result from the login check, and it says the server doesn't allow this user to login
+            // we got a result from the login check, and it says the server doesn't allow this user to log in
             return Result.err(new IOException("The ID server doesn't accept our login"));
 
 
@@ -67,8 +68,8 @@ public class ResultExample {
             idPerAddress = idPerAddressResult.getValue();
         }
 
-        // we have asked IDs for all data that we have and now have to decide for the ID to take.
-        // The license plate is the strongest ID and will be used unless name and address IDs exist and are different
+        // We have asked IDs for all data that we have and now have to decide for the ID to take.
+        // The license plate is the strongest ID and will be used unless name and address IDs exist and are different,
         // so check for those first
         if (idPerName != null && Objects.equals(idPerName, idPerAddress))
             return Result.ok(new IdDef(idPerName, "by name and address"));
@@ -122,7 +123,7 @@ public class ResultExample {
     private Result<Boolean, IOException> checkLoginToRestService() {
         if (!loggedIn)
             return logIn();
-        // assuming we have a valid logged in connection
+        // assuming we have a validly logged in connection
         return Result.ok(true);
     }
 
@@ -140,8 +141,8 @@ public class ResultExample {
     }
 
     private static class IdDef {
-        String id;
-        String source;
+        final String id;
+        final String source;
 
         public IdDef(String id, String source) {
             this.id = id;

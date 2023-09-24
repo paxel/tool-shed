@@ -5,7 +5,7 @@ import lombok.NonNull;
 import java.util.Queue;
 
 /**
- * The QueueBatchRunner takes a number of Runnables from a Qeue and runs them
+ * The QueueBatchRunner takes a number of Runnables from a Queue and runs them
  * sequentially.
  */
 class QueueBatchRunner implements Runnable {

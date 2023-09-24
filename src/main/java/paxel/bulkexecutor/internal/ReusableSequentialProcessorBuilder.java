@@ -9,7 +9,7 @@ import java.util.concurrent.ExecutorService;
 import static java.util.Objects.requireNonNull;
 
 public class ReusableSequentialProcessorBuilder implements SequentialProcessorBuilder {
-    private ExecutorService executorService;
+    private final ExecutorService executorService;
     private int batchSize = 1;
     private ErrorHandler errorHandler = x -> true;
 

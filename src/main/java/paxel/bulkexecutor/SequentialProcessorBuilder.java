@@ -10,12 +10,12 @@ public interface SequentialProcessorBuilder {
 
     /**
      * The number of messages that are tried to be processed, before freeing the thread for another processor.
-     * If you have lots of fast processes and less threads than sequential processors, it makes sense to increase the batch size.
-     * If you have more threads than sequential processors it also makes sense to choose big batch sizes for less overhead.
-     * If you have long running processes and less threads than sequential processors, big batch sizes can stall processing of other sequential processors.
+     * If you have lots of fast processes and fewer threads than sequential processors, it makes sense to increase the batch size.
+     * If you have more threads than sequential processors, it also makes sense to choose big batch sizes for less overhead.
+     * If you have long-running processes and fewer threads than sequential processors, big batch sizes can stall processing of other sequential processors.
      * Default is 1
      *
-     * @param batchSize the number of processes finished, before the thread is released and the sequential processors waits for a new thread.
+     * @param batchSize the number of processes finished, before the thread is released and the sequential processors wait for a new thread.
      * @return The builder.
      */
     SequentialProcessorBuilder setBatchSize(int batchSize);
