@@ -2,12 +2,10 @@
 
 To use this small lib you can simply add it via maven
 
-NOTE: This version is not compatible with JAVA 8~~~~
-
 ```xml
 <dependency>
     <groupId>io.github.paxel</groupId>
-    <artifactId>group-executor-java11</artifactId>
+    <artifactId>group-executor</artifactId>
     <version><!-- See release page --></version>
 </dependency>
 ```
