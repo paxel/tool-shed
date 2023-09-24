@@ -1,12 +1,13 @@
 package paxel.bulkexecutor.internal;
 
-import lombok.SneakyThrows;
-import lombok.val;
 import paxel.bulkexecutor.ErrorHandler;
 import paxel.bulkexecutor.RunnableCompleter;
 import paxel.bulkexecutor.SequentialProcessor;
+import sun.misc.Unsafe;
 
-import java.util.concurrent.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
@@ -61,7 +62,6 @@ public class ConcurrentDequeSequentialProcessor implements SequentialProcessor {
         return addWithOptionalBackPressure(runnable, threshold);
     }
 
-    @SneakyThrows(InterruptedException.class)
     private boolean addWithOptionalBackPressure(Runnable r, Integer threshold) {
         if (runStatus == ABORT) {
             // We don't accept any new Runnable.
@@ -70,7 +70,12 @@ public class ConcurrentDequeSequentialProcessor implements SequentialProcessor {
         // first, we try to put the runnable in the queue
 
         if (threshold != null) {
-            awaitQueueSize(threshold);
+           try{
+               awaitQueueSize(threshold);
+           } catch (InterruptedException e) {
+               // Sneaky throw
+               Unsafe.getUnsafe().throwException(e);
+           }
         }
         try {
             // in case two sources add messages concurrently; we must make sure the status is always correct
@@ -180,7 +185,7 @@ public class ConcurrentDequeSequentialProcessor implements SequentialProcessor {
                 // mark queued after check
                 runStatus = QUEUED;
                 // we submit the QueueRunner again.
-                val future = new CompletableFuture<Void>();
+                final CompletableFuture<Void> future = new CompletableFuture<>();
                 executorService.submit(new RunnableCompleter(queueRunner, future));
                 // and will go back into the finished method when it completes
                 future.handle((a, b) -> finished(b));

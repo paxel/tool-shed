@@ -1,9 +1,5 @@
 package paxel.lib;
 
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -14,13 +10,17 @@ import java.util.function.Supplier;
  * @param <E> the error type of the Result.
  */
 
-@Getter
-@RequiredArgsConstructor
-@EqualsAndHashCode(doNotUseGetters = true)
 public class Result<V, E> {
+
     private final V value;
     private final E error;
     private final ResultStatus status;
+
+    public Result(V value, E error, ResultStatus status) {
+        this.value = value;
+        this.error = error;
+        this.status = status;
+    }
 
     public static <V, E> Result<V, E> ok(V value) {
         return new Result<>(value, null, ResultStatus.SUCCESS);
@@ -141,7 +141,43 @@ public class Result<V, E> {
         }
     }
 
-    @Getter
+    public ResultStatus getStatus() {
+        return this.status;
+    }
+
+    public boolean equals(final Object o) {
+        if (o == this) return true;
+        if (!(o instanceof Result)) return false;
+        final Result<?, ?> other = (Result<?, ?>) o;
+        if (!other.canEqual((Object) this)) return false;
+        final Object this$value = this.value;
+        final Object other$value = other.value;
+        if (this$value == null ? other$value != null : !this$value.equals(other$value)) return false;
+        final Object this$error = this.error;
+        final Object other$error = other.error;
+        if (this$error == null ? other$error != null : !this$error.equals(other$error)) return false;
+        final Object this$status = this.status;
+        final Object other$status = other.status;
+        if (this$status == null ? other$status != null : !this$status.equals(other$status)) return false;
+        return true;
+    }
+
+    protected boolean canEqual(final Object other) {
+        return other instanceof Result;
+    }
+
+    public int hashCode() {
+        final int PRIME = 59;
+        int result = 1;
+        final Object $value = this.value;
+        result = result * PRIME + ($value == null ? 43 : $value.hashCode());
+        final Object $error = this.error;
+        result = result * PRIME + ($error == null ? 43 : $error.hashCode());
+        final Object $status = this.status;
+        result = result * PRIME + ($status == null ? 43 : $status.hashCode());
+        return result;
+    }
+
     public enum ResultStatus {
         FAIL(false), SUCCESS(true);
 
@@ -149,6 +185,10 @@ public class Result<V, E> {
 
         ResultStatus(boolean success) {
             this.success = success;
+        }
+
+        public boolean isSuccess() {
+            return this.success;
         }
     }
 

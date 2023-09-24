@@ -1,8 +1,6 @@
 package paxel.bulkexecutor.internal;
 
-import lombok.NonNull;
-import lombok.val;
-
+import java.util.Objects;
 import java.util.Queue;
 
 /**
@@ -26,16 +24,16 @@ class QueueBatchRunner implements Runnable {
      * @param batch    the number of jobs to be processed in batch.
      * @param queuePop The runnable that is called when an entry is popped from the queue; before it is actually processed.
      */
-    QueueBatchRunner(@NonNull Queue<Runnable> q, int batch, @NonNull Runnable queuePop) {
-        this.q = q;
+    QueueBatchRunner(Queue<Runnable> q, int batch, Runnable queuePop) {
+        this.q = Objects.requireNonNull(q, "Argument q can not be null");
         this.batch = batch;
-        this.queuePop = queuePop;
+        this.queuePop = Objects.requireNonNull(queuePop, "Argument queuePop can not be null");
     }
 
     @Override
     public void run() {
         for (int i = 0; i < batch; i++) {
-            val poll = q.poll();
+            final Runnable poll = q.poll();
             if (poll != null) {
                 queuePop.run();
                 poll.run();

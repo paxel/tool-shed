@@ -1,6 +1,5 @@
 package paxel.bulkexecutor;
 
-import lombok.Getter;
 import org.junit.Test;
 import org.openjdk.jmh.annotations.*;
 import org.openjdk.jmh.runner.Runner;
@@ -186,7 +185,10 @@ public class JmhActorBasedSumTest {
     @SuppressWarnings("ClassEscapesDefinedScope")
     public static class Actor1 {
 
-        @Getter
+        public long getResult() {
+            return result;
+        }
+
         private long result;
 
         private final SequentialProcessor createSingleSourceSequentialProcessor;
