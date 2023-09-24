@@ -1,6 +1,7 @@
 package paxel.bulkexecutor.internal;
 
 import lombok.SneakyThrows;
+import lombok.val;
 import paxel.bulkexecutor.ErrorHandler;
 import paxel.bulkexecutor.RunnableCompleter;
 import paxel.bulkexecutor.SequentialProcessor;
@@ -72,7 +73,7 @@ public class ConcurrentDequeSequentialProcessor implements SequentialProcessor {
             awaitQueueSize(threshold);
         }
         try {
-            // in case two sources add messages concurrently, we must make sure the status is always correct
+            // in case two sources add messages concurrently; we must make sure the status is always correct
             // otherwise we could have a state where messages are queued, but no runner active
             reentrantLock.lock();
             boolean offer = queue.offer(r);
@@ -179,7 +180,7 @@ public class ConcurrentDequeSequentialProcessor implements SequentialProcessor {
                 // mark queued after check
                 runStatus = QUEUED;
                 // we submit the QueueRunner again.
-                CompletableFuture<Void> future = new CompletableFuture<>();
+                val future = new CompletableFuture<Void>();
                 executorService.submit(new RunnableCompleter(queueRunner, future));
                 // and will go back into the finished method when it completes
                 future.handle((a, b) -> finished(b));
