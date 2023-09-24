@@ -44,7 +44,7 @@ public class ResultExample {
             // He wants an ID and doesn't know we have to get that from the network, so we tell him
             return login.mapError(e -> new IOException("Could not login to ID Server", e));
 
-        if (!login.getValue())
+        if (!login.value())
             // we got a result from the login check, and it says the server doesn't allow this user to log in
             return Result.err(new IOException("The ID server doesn't accept our login"));
 
@@ -57,7 +57,7 @@ public class ResultExample {
             if (!idPerNameResult.isSuccess()) {
                 return idPerNameResult.mapError(e -> new IOException("While requesting ID by name", e));
             }
-            idPerName = idPerNameResult.getValue();
+            idPerName = idPerNameResult.value();
         }
         String idPerAddress = null;
         if (address != null) {
@@ -65,7 +65,7 @@ public class ResultExample {
             if (!idPerAddressResult.isSuccess()) {
                 return idPerAddressResult.mapError(e -> new IOException("While requesting ID by address", e));
             }
-            idPerAddress = idPerAddressResult.getValue();
+            idPerAddress = idPerAddressResult.value();
         }
 
         // We have asked IDs for all data that we have and now have to decide for the ID to take.
@@ -80,7 +80,7 @@ public class ResultExample {
             Result<String, IOException> idPerLicensePlateResult = getIdByLicense(licensePlate);
             if (!idPerLicensePlateResult.isSuccess())
                 return idPerLicensePlateResult.mapError(e -> new IOException("While requesting ID by license plate", e));
-            idPerLicensePlate = idPerLicensePlateResult.getValue();
+            idPerLicensePlate = idPerLicensePlateResult.value();
         }
         if (idPerLicensePlate != null)
             return Result.ok(new IdDef(idPerLicensePlate, "by license plate"));
@@ -140,13 +140,6 @@ public class ResultExample {
         return Result.ok(true);
     }
 
-    private static class IdDef {
-        final String id;
-        final String source;
-
-        public IdDef(String id, String source) {
-            this.id = id;
-            this.source = source;
-        }
+    private record IdDef(String id, String source) {
     }
 }

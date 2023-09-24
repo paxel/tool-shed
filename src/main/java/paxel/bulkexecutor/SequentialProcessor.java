@@ -50,7 +50,7 @@ public interface SequentialProcessor {
     void awaitFinish() throws InterruptedException;
 
     /**
-     * The Processor was aborted bcause a Runnable threw a Throwable, and the
+     * The Processor was aborted because a Runnable threw a Throwable, and the
      * ErrorHandler decided to abort the process. The remaining Runnables were
      * removed from the queue.
      *

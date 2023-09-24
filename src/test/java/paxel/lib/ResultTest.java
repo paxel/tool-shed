@@ -21,7 +21,7 @@ class ResultTest {
         @Test
         @DisplayName("should be ResultStatus.SUCCESS")
         void isSuccessEnum() {
-            assertThat( Result.ok("myName").getStatus(),is(Result.ResultStatus.SUCCESS));
+            assertThat( Result.ok("myName").status(),is(Result.ResultStatus.SUCCESS));
         }
 
         @Test
@@ -43,7 +43,7 @@ class ResultTest {
         @Test
         @DisplayName("should be ResultStatus.FAIL")
         void isSuccessEnum() {
-            assertThat( Result.err("myName").getStatus(),is(Result.ResultStatus.FAIL));
+            assertThat( Result.err("myName").status(),is(Result.ResultStatus.FAIL));
         }
 
         @Test

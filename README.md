@@ -88,7 +88,7 @@ A: wrong. check that:
 
 you will receive the value of x that is current at the point of time that the queued element is processed.
 
-Q: well thats not very comfortable.   
+Q: well that's not very comfortable.   
 A: just use a CompletableFuture instead an IntConsumer and you can react to the value immediately
 
 ```java
@@ -163,7 +163,7 @@ The FrankenList has a single ArrayList, that contains LinkedLists.
 Each LinkedList has a maximum size.
 If a LinkedList reaches that size, it is split in half and the lower half inserted into the arraylist.
 If a LinkedList is empty, it is removed from the ArrayList.
-For each ArrayList a metaobject stores the global start index of the LinkedList.
+For each ArrayList a meta-object stores the global start index of the LinkedList.
 
 The benefit:
 FrankenList has nearly random access: 
@@ -246,7 +246,7 @@ The FrankenList has to copy all the LinkedLists to an Array and afterwards the s
 
 
 ### Searching an entry and use a ListFilter to manipulate the environment
-The main usecase what the FrankenList was designed for was being used with a ListIterator
+The main use-case what the FrankenList was designed for was being used with a ListIterator
 to manipulate some values at a given position. e.g finding an entry, examining the surrounding entries and
 eventually remove, replace and/or insert an entry.
 

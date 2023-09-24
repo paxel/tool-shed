@@ -83,17 +83,17 @@ public class ConcurrentDequeSequentialProcessor implements SequentialProcessor {
             reentrantLock.lock();
             boolean offer = queue.offer(r);
             // local copy to prevent changes in between.
-            int runStatusAfterAfterOffer = this.runStatus;
+            var runStatusAfterAfterOffer = this.runStatus;
             if (offer) {
                 for (; ; ) {
                     switch (runStatusAfterAfterOffer) {
-                        case IDLE: {
+                        case IDLE -> {
                             /*
                              * There is currently no QueueRunner active for this
                              * Processor. We change the status and submit a QueueRunner.
                              */
                             this.runStatus = QUEUED;
-                            CompletableFuture<Void> future = new CompletableFuture<>();
+                            final var future = new CompletableFuture<Void>();
                             // when the QueueRunner is finished, the finished method will be executed.
                             // adding the handle method before the submission makes sure the finished method is
                             // always called by the executor framework
@@ -101,7 +101,7 @@ public class ConcurrentDequeSequentialProcessor implements SequentialProcessor {
                             executorService.submit(new RunnableCompleter(queueRunner, future));
                             return true;
                         }
-                        case QUEUED: {
+                        case QUEUED -> {
                             /*
                              * There is currently a QueueRunner active.
                              * Either it already has grabbed our runnable or it will
@@ -109,13 +109,12 @@ public class ConcurrentDequeSequentialProcessor implements SequentialProcessor {
                              */
                             return true;
                         }
-                        case ABORT: {
+                        case ABORT -> {
                             // we don't accept any new jobs
                             queue.clear();
                             return false;
                         }
-                        case FINISHED:
-                        default: {
+                        default -> {
                             // busy loop. the QueueRunner just finished and has to decide on the runStatus
                             runStatusAfterAfterOffer = this.runStatus;
                         }
@@ -185,7 +184,7 @@ public class ConcurrentDequeSequentialProcessor implements SequentialProcessor {
                 // mark queued after check
                 runStatus = QUEUED;
                 // we submit the QueueRunner again.
-                final CompletableFuture<Void> future = new CompletableFuture<>();
+                final var future = new CompletableFuture<Void>();
                 executorService.submit(new RunnableCompleter(queueRunner, future));
                 // and will go back into the finished method when it completes
                 future.handle((a, b) -> finished(b));

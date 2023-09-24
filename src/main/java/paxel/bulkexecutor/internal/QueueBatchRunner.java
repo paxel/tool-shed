@@ -33,7 +33,7 @@ class QueueBatchRunner implements Runnable {
     @Override
     public void run() {
         for (int i = 0; i < batch; i++) {
-            final Runnable poll = q.poll();
+            var poll = q.poll();
             if (poll != null) {
                 queuePop.run();
                 poll.run();

@@ -43,7 +43,7 @@ public class ExecutorCompletionServiceTest {
     }
 
     @Test
-    public void testFailRunableWithResult() {
+    public void testFailRunnableWithResult() {
         ExecutorCompletionService completionService = new ExecutorCompletionService(Executors.newFixedThreadPool(1));
         // the Runnable throws an exception, that is verified and converted.
         completionService.submit(() -> {
