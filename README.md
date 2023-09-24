@@ -15,8 +15,8 @@ This is an executor that runs processes that belong to a group sequentially.
 Multiple groups run in parallel, depending on how the executor is configured.
 
 A simple example would be to see each group as an entity in a game:
-Let's assume we have a game field full with bunnies. Each bunny represents a group, or an actor. It has a state (position, hunger, sex, age, color).
-Each action of each bunny is represented by Runnables that change the status of the bunny. (eat, move, have sex, die, fight)
+Let's assume we have a game field full of bunnies. Each bunny represents a group, or an actor. It has a state (position, hunger, sex, age, color).
+Each action of each bunny is represented by a Runnable that change the status of the bunny. (eat, move, have sex, die, fight)
 Each bunny can only do one action at once, but all bunnies act at the same time.
 
 This executor does exactly that; Depending on the thread pooling of the used ExecutorService, either all or some bunnies act concurrently, but each bunny will only do one action at a time.
@@ -112,9 +112,9 @@ This is not expected to be the most performant solution. But it should be fairly
 
 # Feature Result<V,E>
 
-In Rsut there are no exceptions, but panics.
+In Rust there are no exceptions, but panics.
 A generic set of enums Ok and Err are used to return valid results and errors.
-The Ok enum value contains the result and the Err comtains the reason why there is no Ok result.
+The Ok enum value contains the result and the Err contains the reason why there is no Ok result.
 There are some code candy to handle the two types that don't exist in Java.
 
 But there are places where this procedural handling of Results is handy and leads to more understandable code (at least for me), so I started implementing my own Result class that tries to mimic the RUST way.
@@ -147,11 +147,11 @@ completionService.submit(() -> doSomething())
 
 # Feature FrankenList
 
-The Frankenlist combines Array and LinkedList to improve sort and search performance for very full lists.
+The FrankenList combines Array and LinkedList to improve sort and search performance for very full lists.
 
 If you need to maintain data sorted, you usually use either an Array or a LinkedList depending on your use case.
 
-ArrayList has random access and you can find the index very fast thanks to binary search.
+ArrayList has random access, and you can find the index very fast thanks to binary search.
 LinkedList can insert and remove objects in the list very fast.
 
 ArrayList has to copy all the elements behind an insert/remove.
@@ -163,7 +163,7 @@ The FrankenList has a single ArrayList, that contains LinkedLists.
 Each LinkedList has a maximum size.
 If a LinkedList reaches that size, it is split in half and the lower half inserted into the arraylist.
 If a LinkedList is empty, it is removed from the ArrayList.
-For each ArrayList a meta object stores the global start index of the LinkedList.
+For each ArrayList a metaobject stores the global start index of the LinkedList.
 
 The benefit:
 FrankenList has nearly random access: 
