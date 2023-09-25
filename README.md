@@ -69,6 +69,8 @@ public class Bunny {
 
 Q: Why use this anyway? I can just use a single Threaded Executor in the Bunny.   
 A: Yes, but if you have 1_000_000 Bunnies, you peak at 1 mio Threads. Good bye.
+Q: I can use Virtual Threads now
+A: Damn. you're right. This thing is outdated!
 
 Q: Well I could use a limited ExecutorService and limit it to 20.   
 A: Yes, but then one bunny is hopping concurrently up **and** down. Good bye.
@@ -280,7 +282,7 @@ scenario.
 It must be said, that the ListIterator here is not optimized.
 A dedicated FrankenListIterator will improve this value additionally.
 
-## Benchmark results
+# Overall Benchmark results
 ```
 Benchmark                                                                  (entries)   Mode  Cnt       Score       Error  Units
 p.bulkexecutor.JmhActorBasedSumTest.runBatch                                     N/A  thrpt    5       2.112 ±     0.023  ops/s

@@ -1,13 +1,14 @@
 package paxel.lib;
 
+import org.junit.Test;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Random;
+
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.fail;
-import org.junit.Test;
-import paxel.lib.FrankenList;
 
 public class FrankenListTest {
 

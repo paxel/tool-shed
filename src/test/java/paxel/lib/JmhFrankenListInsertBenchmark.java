@@ -5,6 +5,8 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.TimeUnit;
+
 import org.openjdk.jmh.annotations.*;
 import org.openjdk.jmh.infra.Blackhole;
 import org.openjdk.jmh.runner.Runner;
@@ -12,10 +14,11 @@ import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 
+@Warmup(time = 1,iterations = 1,batchSize = 1,timeUnit = TimeUnit.SECONDS)
 public class JmhFrankenListInsertBenchmark {
 
     @Benchmark
-    public void addToFrankenListWith_a_125k_Entries(FrankenDataProvider125k prov, Blackhole bh) {
+    public void addTo125k_Entries_FrankenList(FrankenDataProvider125k prov, Blackhole bh) {
         final List<Long> unsortedNewValues = prov.unsortedNewValues;
         final List<Long> listUnderTest = prov.sortedList;
         addNewValuesToList(unsortedNewValues, listUnderTest);
@@ -23,7 +26,7 @@ public class JmhFrankenListInsertBenchmark {
     }
 
     @Benchmark
-    public void addToLinkedListWith_a_125k_Entries(LinkedListDataProvider125k prov, Blackhole bh) {
+    public void addTo125k_Entries_LinkedList(LinkedListDataProvider125k prov, Blackhole bh) {
         final List<Long> unsortedNewValues = prov.unsortedNewValues;
         final List<Long> listUnderTest = prov.sortedList;
         addNewValuesToList(unsortedNewValues, listUnderTest);
@@ -31,7 +34,7 @@ public class JmhFrankenListInsertBenchmark {
     }
 
     @Benchmark
-    public void addToArrayListWith_a_125k_Entries(ArrayListDataProvider125k prov, Blackhole bh) {
+    public void addTo125k_Entries_ArrayList(ArrayListDataProvider125k prov, Blackhole bh) {
         final List<Long> unsortedNewValues = prov.unsortedNewValues;
         final List<Long> listUnderTest = prov.sortedList;
         addNewValuesToList(unsortedNewValues, listUnderTest);
@@ -39,7 +42,7 @@ public class JmhFrankenListInsertBenchmark {
     }
 
     @Benchmark
-    public void addToFrankenListWith_a_250k_Entries(FrankenDataProvider250k prov, Blackhole bh) {
+    public void addTo250k_Entries_FrankenList(FrankenDataProvider250k prov, Blackhole bh) {
         final List<Long> unsortedNewValues = prov.unsortedNewValues;
         final List<Long> listUnderTest = prov.sortedList;
         addNewValuesToList(unsortedNewValues, listUnderTest);
@@ -47,7 +50,7 @@ public class JmhFrankenListInsertBenchmark {
     }
 
     @Benchmark
-    public void addToLinkedListWith_a_250k_Entries(LinkedListDataProvider250k prov, Blackhole bh) {
+    public void addTo250k_Entries_LinkedList(LinkedListDataProvider250k prov, Blackhole bh) {
         final List<Long> unsortedNewValues = prov.unsortedNewValues;
         final List<Long> listUnderTest = prov.sortedList;
         addNewValuesToList(unsortedNewValues, listUnderTest);
@@ -55,7 +58,7 @@ public class JmhFrankenListInsertBenchmark {
     }
 
     @Benchmark
-    public void addToArrayListWith_a_250k_Entries(ArrayListDataProvider250k prov, Blackhole bh) {
+    public void addTo250k_Entries_ArrayList(ArrayListDataProvider250k prov, Blackhole bh) {
         final List<Long> unsortedNewValues = prov.unsortedNewValues;
         final List<Long> listUnderTest = prov.sortedList;
         addNewValuesToList(unsortedNewValues, listUnderTest);
@@ -63,7 +66,7 @@ public class JmhFrankenListInsertBenchmark {
     }
 
     @Benchmark
-    public void addToFrankenListWith_a_500k_Entries(FrankenDataProvider500k prov, Blackhole bh) {
+    public void addTo500k_Entries_FrankenList(FrankenDataProvider500k prov, Blackhole bh) {
         final List<Long> unsortedNewValues = prov.unsortedNewValues;
         final List<Long> listUnderTest = prov.sortedList;
         addNewValuesToList(unsortedNewValues, listUnderTest);
@@ -71,7 +74,7 @@ public class JmhFrankenListInsertBenchmark {
     }
 
     @Benchmark
-    public void addToLinkedListWith_a_500k_Entries(LinkedListDataProvider500k prov, Blackhole bh) {
+    public void addTo500k_Entries_LinkedList(LinkedListDataProvider500k prov, Blackhole bh) {
         final List<Long> unsortedNewValues = prov.unsortedNewValues;
         final List<Long> listUnderTest = prov.sortedList;
         addNewValuesToList(unsortedNewValues, listUnderTest);
@@ -79,7 +82,7 @@ public class JmhFrankenListInsertBenchmark {
     }
 
     @Benchmark
-    public void addToArrayListWith_a_500k_Entries(ArrayListDataProvider500k prov, Blackhole bh) {
+    public void addTo500k_Entries_ArrayList(ArrayListDataProvider500k prov, Blackhole bh) {
         final List<Long> unsortedNewValues = prov.unsortedNewValues;
         final List<Long> listUnderTest = prov.sortedList;
         addNewValuesToList(unsortedNewValues, listUnderTest);
@@ -87,7 +90,7 @@ public class JmhFrankenListInsertBenchmark {
     }
 
     @Benchmark
-    public void addToFrankenListWith_b_1m_Entries(FrankenDataProvider prov, Blackhole bh) {
+    public void addTo1000k_Entries_FrankenList(FrankenDataProvider prov, Blackhole bh) {
         final List<Long> unsortedNewValues = prov.unsortedNewValues;
         final List<Long> listUnderTest = prov.sortedList;
         addNewValuesToList(unsortedNewValues, listUnderTest);
@@ -95,7 +98,7 @@ public class JmhFrankenListInsertBenchmark {
     }
 
     @Benchmark
-    public void addToLinkedListWith_b_1m_Entries(LinkedListDataProvider prov, Blackhole bh) {
+    public void addTo1000k_Entries_LinkedList(LinkedListDataProvider prov, Blackhole bh) {
         final List<Long> unsortedNewValues = prov.unsortedNewValues;
         final List<Long> listUnderTest = prov.sortedList;
         addNewValuesToList(unsortedNewValues, listUnderTest);
@@ -103,7 +106,7 @@ public class JmhFrankenListInsertBenchmark {
     }
 
     @Benchmark
-    public void addToArrayListWith_b_1m_Entries(ArrayListDataProvider prov, Blackhole bh) {
+    public void addTo1000k_Entries_ArrayList(ArrayListDataProvider prov, Blackhole bh) {
         final List<Long> unsortedNewValues = prov.unsortedNewValues;
         final List<Long> listUnderTest = prov.sortedList;
         addNewValuesToList(unsortedNewValues, listUnderTest);
@@ -111,7 +114,7 @@ public class JmhFrankenListInsertBenchmark {
     }
 
     @Benchmark
-    public void addToFrankenListWith_c_10m_Entries(FrankenDataProvider10m prov, Blackhole bh) {
+    public void addTo10_000k_Entries_FrankenList(FrankenDataProvider10m prov, Blackhole bh) {
         final List<Long> unsortedNewValues = prov.unsortedNewValues;
         final List<Long> listUnderTest = prov.sortedList;
         addNewValuesToList(unsortedNewValues, listUnderTest);
@@ -119,7 +122,7 @@ public class JmhFrankenListInsertBenchmark {
     }
 
     @Benchmark
-    public void addToLinkedListWith_c_10m_Entries(LinkedListDataProvider10m prov, Blackhole bh) {
+    public void addTo10_000k_Entries_LinkedList(LinkedListDataProvider10m prov, Blackhole bh) {
         final List<Long> unsortedNewValues = prov.unsortedNewValues;
         final List<Long> listUnderTest = prov.sortedList;
         addNewValuesToList(unsortedNewValues, listUnderTest);
@@ -127,7 +130,7 @@ public class JmhFrankenListInsertBenchmark {
     }
 
     @Benchmark
-    public void addToArrayListWith_c_10m_Entries(ArrayListDataProvider10m prov, Blackhole bh) {
+    public void addTo10_000k_Entries_ArrayList(ArrayListDataProvider10m prov, Blackhole bh) {
         final List<Long> unsortedNewValues = prov.unsortedNewValues;
         final List<Long> listUnderTest = prov.sortedList;
         addNewValuesToList(unsortedNewValues, listUnderTest);
