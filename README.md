@@ -5,119 +5,21 @@ To use this small lib you can simply add it via maven
 ```xml
 <dependency>
     <groupId>io.github.paxel</groupId>
-    <artifactId>group-executor</artifactId>
+    <artifactId>tool-shed</artifactId>
     <version><!-- See release page --></version>
 </dependency>
 ```
 
 # Feature group-executor
-This is an executor that runs processes that belong to a group sequentially.
-Multiple groups run in parallel, depending on how the executor is configured.
 
-A simple example would be to see each group as an entity in a game:
-Let's assume we have a game field full of bunnies. Each bunny represents a group, or an actor. It has a state (position, hunger, sex, age, color).
-Each action of each bunny is represented by a Runnable that change the status of the bunny. (eat, move, have sex, die, fight)
-Each bunny can only do one action at once, but all bunnies act at the same time.
-
-This executor does exactly that; Depending on the thread pooling of the used ExecutorService, either all or some bunnies act concurrently, but each bunny will only do one action at a time.
-
-```java
-GroupingExecutor e = new GroupingExecutor(executorService);
-
-// create two groups
-SequentialProcessor youngBunny = e.createMultiSourceSequentialProcessor()
-SequentialProcessor maleBunny = e.createMultiSourceSequentialProcessor()
-
-maleBunny.addRunnable(()->mb.searchFemale())
-youngBunny.addRunnable(()->yb.searchFood())
-youngBunny.addRunnable(()->yb.eatFood())
-maleBunny.addRunnable(()->mb.sniff())
-maleBunny.addRunnable(()->mb.searchFood())
-youngBunny.addRunnable(()->yb.cleanFur())
-maleBunny.addRunnable(()->mb.search(yb))
-
-```
-Of course it makes way more sense to have the SequentialProcessor inside of an instance of bunny and delegate all the action of that instance to the processor. If done correctly, the bunny instance becomes completely threadsafe, because the commands are all executed one after another.
-
-```java
-public class Bunny {
-
-    private final SequentialProcessor processor;
-
-    // never used by another thread than the SequentialProcessor
-    private int x;
-
-    public Bunny(SequentialProcessor processor) {
-        this.processor = processor;
-    }
-
-    public void hopUp() {
-        processor.add(() -> incX(1));
-    }
-
-    public void hopDown() {
-        processor.add(() -> incX(-1));
-    }
-
-    private void incX(int diff) {
-        x += diff;
-    }
-
-}
-```
-*FAQ:*
-
-Q: Why use this anyway? I can just use a single Threaded Executor in the Bunny.   
-A: Yes, but if you have 1_000_000 Bunnies, you peak at 1 mio Threads. Good bye.
-Q: I can use Virtual Threads now
-A: Damn. you're right. This thing is outdated!
-
-Q: Well I could use a limited ExecutorService and limit it to 20.   
-A: Yes, but then one bunny is hopping concurrently up **and** down. Good bye.
-
-Q: I can not get the value x out of the bunny.   
-A: wrong. check that:
-
-```java
-   public void askX(IntConsumer bigJimmy) {
-        processor.add(() -> bigJimmy.accept(currentX()));
-    }
-
-    private int currentX(){
-        return x;
-    }
-```
-
-you will receive the value of x that is current at the point of time that the queued element is processed.
-
-Q: well that's not very comfortable.   
-A: just use a CompletableFuture instead an IntConsumer and you can react to the value immediately
-
-```java
-   public CompletableFuture<Integer> askX() {
-        CompletableFuture<Integer> bigJimmy = new CompletableFuture();
-        processor.add(() -> bigJimmy.complete(currentX()));
-        return bigJimmy;
-    }
-
-
-...
-
-     // ask for value and poop the x
-     bunny.askX().thenAccept(r->bunny.poop(r));
-
-
-```
-
-
-This is not expected to be the most performant solution. But it should be fairly simple to use.
+This component got completely obsolete with Virtual Threads
 
 # Feature Result<V,E>
 
-In Rust there are no exceptions, but panics.
+In Rust-lang there are no exceptions, but there are panics.
 A generic set of enums Ok and Err are used to return valid results and errors.
-The Ok enum value contains the result and the Err contains the reason why there is no Ok result.
-There are some code candy to handle the two types that don't exist in Java.
+The Ok enum value contains the result, and the Err contains the reason why there is no Ok result.
+There is some code candy to handle the two types that don't exist in Java.
 
 But there are places where this procedural handling of Results is handy and leads to more understandable code (at least for me), so I started implementing my own Result class that tries to mimic the RUST way.
 
@@ -285,47 +187,6 @@ A dedicated FrankenListIterator will improve this value additionally.
 # Overall Benchmark results
 ```
 Benchmark                                                                  (entries)   Mode  Cnt       Score       Error  Units
-p.bulkexecutor.JmhActorBasedSumTest.runBatch                                     N/A  thrpt    5       2.112 ±     0.023  ops/s
-p.bulkexecutor.JmhActorBasedSumTest.runOneThreadSingleSourceActors               N/A  thrpt    5       2.099 ±     0.023  ops/s
-p.bulkexecutor.JmhActorBasedSumTest.runThreeThreadsMultiSourceActors             N/A  thrpt    5       2.271 ±     0.016  ops/s
-p.bulkexecutor.JmhActorBasedSumTest.runThreeThreadsSingleSourceActors            N/A  thrpt    5       2.267 ±     0.019  ops/s
-p.bulkexecutor.JmhActorBasedSumTest.runTwoThreadsSingleSourceActors              N/A  thrpt    5       2.262 ±     0.016  ops/s
-p.bulkexecutor.JmhStreamPerformanceMeasurement.collectFilteredFor                 10  thrpt   25  664963.186 ±  2642.725  ops/s
-p.bulkexecutor.JmhStreamPerformanceMeasurement.collectFilteredFor              10000  thrpt   25    4882.673 ±    27.570  ops/s
-p.bulkexecutor.JmhStreamPerformanceMeasurement.collectFilteredFor           10000000  thrpt   25       1.267 ±     0.033  ops/s
-p.bulkexecutor.JmhStreamPerformanceMeasurement.collectFilteredForGet              10  thrpt   25  657429.079 ±  1330.734  ops/s
-p.bulkexecutor.JmhStreamPerformanceMeasurement.collectFilteredForGet           10000  thrpt   25    4752.512 ±    31.196  ops/s
-p.bulkexecutor.JmhStreamPerformanceMeasurement.collectFilteredForGet        10000000  thrpt   25       1.222 ±     0.024  ops/s
-p.bulkexecutor.JmhStreamPerformanceMeasurement.collectFilteredStream              10  thrpt   25  647523.544 ± 12258.140  ops/s
-p.bulkexecutor.JmhStreamPerformanceMeasurement.collectFilteredStream           10000  thrpt   25    5183.430 ±   147.312  ops/s
-p.bulkexecutor.JmhStreamPerformanceMeasurement.collectFilteredStream        10000000  thrpt   25       1.285 ±     0.020  ops/s
-p.bulkexecutor.JmhStreamPerformanceMeasurement.collectFor                         10  thrpt   25  587503.214 ±  2129.120  ops/s
-p.bulkexecutor.JmhStreamPerformanceMeasurement.collectFor                      10000  thrpt   25    1363.292 ±     8.358  ops/s
-p.bulkexecutor.JmhStreamPerformanceMeasurement.collectFor                   10000000  thrpt   25       0.316 ±     0.019  ops/s
-p.bulkexecutor.JmhStreamPerformanceMeasurement.collectForGet                      10  thrpt   25  583630.222 ± 13366.557  ops/s
-p.bulkexecutor.JmhStreamPerformanceMeasurement.collectForGet                   10000  thrpt   25    1342.964 ±     4.951  ops/s
-p.bulkexecutor.JmhStreamPerformanceMeasurement.collectForGet                10000000  thrpt   25       0.303 ±     0.026  ops/s
-p.bulkexecutor.JmhStreamPerformanceMeasurement.collectStream                      10  thrpt   25  581644.066 ±  7920.941  ops/s
-p.bulkexecutor.JmhStreamPerformanceMeasurement.collectStream                   10000  thrpt   25    2688.518 ±    37.447  ops/s
-p.bulkexecutor.JmhStreamPerformanceMeasurement.collectStream                10000000  thrpt   25       0.432 ±     0.038  ops/s
-p.bulkexecutor.JmhStreamPerformanceMeasurement.easyTaskFor                        10  thrpt   25  736151.479 ±  3155.612  ops/s
-p.bulkexecutor.JmhStreamPerformanceMeasurement.easyTaskFor                     10000  thrpt   25   36880.698 ±   130.982  ops/s
-p.bulkexecutor.JmhStreamPerformanceMeasurement.easyTaskFor                  10000000  thrpt   25      40.940 ±     0.321  ops/s
-p.bulkexecutor.JmhStreamPerformanceMeasurement.easyTaskForGet                     10  thrpt   25  739221.619 ±  1912.345  ops/s
-p.bulkexecutor.JmhStreamPerformanceMeasurement.easyTaskForGet                  10000  thrpt   25   41050.551 ±    91.541  ops/s
-p.bulkexecutor.JmhStreamPerformanceMeasurement.easyTaskForGet               10000000  thrpt   25      41.129 ±     0.408  ops/s
-p.bulkexecutor.JmhStreamPerformanceMeasurement.easyTaskStream                     10  thrpt   25  723869.606 ±  2431.528  ops/s
-p.bulkexecutor.JmhStreamPerformanceMeasurement.easyTaskStream                  10000  thrpt   25   40064.198 ±    59.569  ops/s
-p.bulkexecutor.JmhStreamPerformanceMeasurement.easyTaskStream               10000000  thrpt   25      40.649 ±     0.385  ops/s
-p.bulkexecutor.JmhStreamPerformanceMeasurement.heavyTaskFor                       10  thrpt   25  722470.351 ±  3136.001  ops/s
-p.bulkexecutor.JmhStreamPerformanceMeasurement.heavyTaskFor                    10000  thrpt   25   14321.763 ±    54.372  ops/s
-p.bulkexecutor.JmhStreamPerformanceMeasurement.heavyTaskFor                 10000000  thrpt   25      15.281 ±     0.049  ops/s
-p.bulkexecutor.JmhStreamPerformanceMeasurement.heavyTaskForGet                    10  thrpt   25  726179.363 ±  1329.968  ops/s
-p.bulkexecutor.JmhStreamPerformanceMeasurement.heavyTaskForGet                 10000  thrpt   25   14316.874 ±    37.767  ops/s
-p.bulkexecutor.JmhStreamPerformanceMeasurement.heavyTaskForGet              10000000  thrpt   25      15.048 ±     0.031  ops/s
-p.bulkexecutor.JmhStreamPerformanceMeasurement.heavyTaskStream                    10  thrpt   25  710265.478 ±  4781.733  ops/s
-p.bulkexecutor.JmhStreamPerformanceMeasurement.heavyTaskStream                 10000  thrpt   25   14117.353 ±    83.238  ops/s
-p.bulkexecutor.JmhStreamPerformanceMeasurement.heavyTaskStream              10000000  thrpt   25      14.642 ±     0.038  ops/s
 p.lib.JmhFrankenListInsertBenchmark.addToArrayListWith_a_125k_Entries            N/A  thrpt   25    9180.892 ±    20.040  ops/s
 p.lib.JmhFrankenListInsertBenchmark.addToArrayListWith_a_250k_Entries            N/A  thrpt   25    5944.973 ±    29.631  ops/s
 p.lib.JmhFrankenListInsertBenchmark.addToArrayListWith_a_500k_Entries            N/A  thrpt   25     561.069 ±    21.827  ops/s
