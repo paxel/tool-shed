@@ -5,7 +5,7 @@
 
     <groupId>io.github.paxel</groupId>
     <artifactId>tool-shed</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>1.0.0</version>
     <packaging>bundle</packaging>
 
     <name>Tool shed</name>
@@ -144,7 +144,7 @@
         <connection>scm:git:git://github.com/paxel/group-executor.git</connection>
         <developerConnection>scm:git:git@github.com:paxel/group-executor.git</developerConnection>
         <url>https://github.com/paxel/group-executor.git</url>
-        <tag>group-executor-2.0.0</tag>
+        <tag>tool-shed-1.0.0</tag>
     </scm>
 
     <profiles>
