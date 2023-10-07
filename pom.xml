@@ -18,7 +18,7 @@
     </properties>
 
     <description>Grouping Executor for grouped sequential processing</description>
-    <url>https://github.com/paxel/group-executor</url>
+    <url>https://github.com/paxel/tool-shed</url>
     <developers>
         <developer>
             <email>axel.evil@gmail.com</email>
@@ -141,9 +141,9 @@
         </repository>
     </distributionManagement>
     <scm>
-        <connection>scm:git:git://github.com/paxel/group-executor.git</connection>
-        <developerConnection>scm:git:git@github.com:paxel/group-executor.git</developerConnection>
-        <url>https://github.com/paxel/group-executor.git</url>
+        <connection>scm:git:git://github.com/paxel/tool-shed.git</connection>
+        <developerConnection>scm:git:git@github.com:paxel/tool-shed.git</developerConnection>
+        <url>https://github.com/paxel/tool-shed.git</url>
         <tag>tool-shed-1.0.0</tag>
     </scm>
 
