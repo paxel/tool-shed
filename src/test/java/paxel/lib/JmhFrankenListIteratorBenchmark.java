@@ -12,6 +12,9 @@ import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 
+@Warmup(time = 1,iterations = 1)
+@Measurement(time = 1,iterations = 1)
+@Fork(1)
 public class JmhFrankenListIteratorBenchmark {
 
     @Benchmark

@@ -2,10 +2,8 @@ package paxel.lib;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
-import java.util.concurrent.TimeUnit;
 
 import org.openjdk.jmh.annotations.*;
 import org.openjdk.jmh.infra.Blackhole;
@@ -14,11 +12,13 @@ import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 
-@Warmup(time = 1,iterations = 1,batchSize = 1,timeUnit = TimeUnit.SECONDS)
+@Warmup(time = 1,iterations = 1)
+@Measurement(time = 1,iterations = 1)
+@Fork(1)
 public class JmhFrankenListInsertBenchmark {
 
     @Benchmark
-    public void addTo125k_Entries_FrankenList(FrankenDataProvider125k prov, Blackhole bh) {
+    public void addTo______100_k_FrankenList_default(FrankenDataProvider100k prov, Blackhole bh) {
         final List<Long> unsortedNewValues = prov.unsortedNewValues;
         final List<Long> listUnderTest = prov.sortedList;
         addNewValuesToList(unsortedNewValues, listUnderTest);
@@ -26,7 +26,34 @@ public class JmhFrankenListInsertBenchmark {
     }
 
     @Benchmark
-    public void addTo125k_Entries_LinkedList(LinkedListDataProvider125k prov, Blackhole bh) {
+    public void addTo______100_k_FrankenList_75(FrankenDataProvider100k_75 prov, Blackhole bh) {
+        final List<Long> unsortedNewValues = prov.unsortedNewValues;
+        final List<Long> listUnderTest = prov.sortedList;
+        addNewValuesToList(unsortedNewValues, listUnderTest);
+        bh.consume(listUnderTest);
+    }
+
+
+    @Benchmark
+    public void addTo______100_k_ArrayList(ArrayListDataProvider100k prov, Blackhole bh) {
+        final List<Long> unsortedNewValues = prov.unsortedNewValues;
+        final List<Long> listUnderTest = prov.sortedList;
+        addNewValuesToList(unsortedNewValues, listUnderTest);
+        bh.consume(listUnderTest);
+    }
+  
+
+    @Benchmark
+    public void addTo____1_000_k_FrankenList(FrankenDataProvider1000k prov, Blackhole bh) {
+        final List<Long> unsortedNewValues = prov.unsortedNewValues;
+        final List<Long> listUnderTest = prov.sortedList;
+        addNewValuesToList(unsortedNewValues, listUnderTest);
+        bh.consume(listUnderTest);
+    }
+
+
+    @Benchmark
+    public void addTo____1_000_k_ArrayList(ArrayListDataProvider1000k prov, Blackhole bh) {
         final List<Long> unsortedNewValues = prov.unsortedNewValues;
         final List<Long> listUnderTest = prov.sortedList;
         addNewValuesToList(unsortedNewValues, listUnderTest);
@@ -34,7 +61,17 @@ public class JmhFrankenListInsertBenchmark {
     }
 
     @Benchmark
-    public void addTo125k_Entries_ArrayList(ArrayListDataProvider125k prov, Blackhole bh) {
+    public void addTo___10_000_k_FrankenList(FrankenDataProvider10m prov, Blackhole bh) {
+        final List<Long> unsortedNewValues = prov.unsortedNewValues;
+        final List<Long> listUnderTest = prov.sortedList;
+        addNewValuesToList(unsortedNewValues, listUnderTest);
+        bh.consume(listUnderTest);
+    }
+
+
+
+    @Benchmark
+    public void addTo___10_000_k_ArrayList(ArrayListDataProvider10m prov, Blackhole bh) {
         final List<Long> unsortedNewValues = prov.unsortedNewValues;
         final List<Long> listUnderTest = prov.sortedList;
         addNewValuesToList(unsortedNewValues, listUnderTest);
@@ -42,7 +79,7 @@ public class JmhFrankenListInsertBenchmark {
     }
 
     @Benchmark
-    public void addTo250k_Entries_FrankenList(FrankenDataProvider250k prov, Blackhole bh) {
+    public void addTo__100_000_k_FrankenList(FrankenDataProvider100m prov, Blackhole bh) {
         final List<Long> unsortedNewValues = prov.unsortedNewValues;
         final List<Long> listUnderTest = prov.sortedList;
         addNewValuesToList(unsortedNewValues, listUnderTest);
@@ -50,87 +87,16 @@ public class JmhFrankenListInsertBenchmark {
     }
 
     @Benchmark
-    public void addTo250k_Entries_LinkedList(LinkedListDataProvider250k prov, Blackhole bh) {
+    public void addTo__100_000_k_FrankenList_7500(FrankenDataProvider100m_75 prov, Blackhole bh) {
         final List<Long> unsortedNewValues = prov.unsortedNewValues;
         final List<Long> listUnderTest = prov.sortedList;
         addNewValuesToList(unsortedNewValues, listUnderTest);
         bh.consume(listUnderTest);
     }
 
-    @Benchmark
-    public void addTo250k_Entries_ArrayList(ArrayListDataProvider250k prov, Blackhole bh) {
-        final List<Long> unsortedNewValues = prov.unsortedNewValues;
-        final List<Long> listUnderTest = prov.sortedList;
-        addNewValuesToList(unsortedNewValues, listUnderTest);
-        bh.consume(listUnderTest);
-    }
 
     @Benchmark
-    public void addTo500k_Entries_FrankenList(FrankenDataProvider500k prov, Blackhole bh) {
-        final List<Long> unsortedNewValues = prov.unsortedNewValues;
-        final List<Long> listUnderTest = prov.sortedList;
-        addNewValuesToList(unsortedNewValues, listUnderTest);
-        bh.consume(listUnderTest);
-    }
-
-    @Benchmark
-    public void addTo500k_Entries_LinkedList(LinkedListDataProvider500k prov, Blackhole bh) {
-        final List<Long> unsortedNewValues = prov.unsortedNewValues;
-        final List<Long> listUnderTest = prov.sortedList;
-        addNewValuesToList(unsortedNewValues, listUnderTest);
-        bh.consume(listUnderTest);
-    }
-
-    @Benchmark
-    public void addTo500k_Entries_ArrayList(ArrayListDataProvider500k prov, Blackhole bh) {
-        final List<Long> unsortedNewValues = prov.unsortedNewValues;
-        final List<Long> listUnderTest = prov.sortedList;
-        addNewValuesToList(unsortedNewValues, listUnderTest);
-        bh.consume(listUnderTest);
-    }
-
-    @Benchmark
-    public void addTo1000k_Entries_FrankenList(FrankenDataProvider prov, Blackhole bh) {
-        final List<Long> unsortedNewValues = prov.unsortedNewValues;
-        final List<Long> listUnderTest = prov.sortedList;
-        addNewValuesToList(unsortedNewValues, listUnderTest);
-        bh.consume(listUnderTest);
-    }
-
-    @Benchmark
-    public void addTo1000k_Entries_LinkedList(LinkedListDataProvider prov, Blackhole bh) {
-        final List<Long> unsortedNewValues = prov.unsortedNewValues;
-        final List<Long> listUnderTest = prov.sortedList;
-        addNewValuesToList(unsortedNewValues, listUnderTest);
-        bh.consume(listUnderTest);
-    }
-
-    @Benchmark
-    public void addTo1000k_Entries_ArrayList(ArrayListDataProvider prov, Blackhole bh) {
-        final List<Long> unsortedNewValues = prov.unsortedNewValues;
-        final List<Long> listUnderTest = prov.sortedList;
-        addNewValuesToList(unsortedNewValues, listUnderTest);
-        bh.consume(listUnderTest);
-    }
-
-    @Benchmark
-    public void addTo10_000k_Entries_FrankenList(FrankenDataProvider10m prov, Blackhole bh) {
-        final List<Long> unsortedNewValues = prov.unsortedNewValues;
-        final List<Long> listUnderTest = prov.sortedList;
-        addNewValuesToList(unsortedNewValues, listUnderTest);
-        bh.consume(listUnderTest);
-    }
-
-    @Benchmark
-    public void addTo10_000k_Entries_LinkedList(LinkedListDataProvider10m prov, Blackhole bh) {
-        final List<Long> unsortedNewValues = prov.unsortedNewValues;
-        final List<Long> listUnderTest = prov.sortedList;
-        addNewValuesToList(unsortedNewValues, listUnderTest);
-        bh.consume(listUnderTest);
-    }
-
-    @Benchmark
-    public void addTo10_000k_Entries_ArrayList(ArrayListDataProvider10m prov, Blackhole bh) {
+    public void addTo__100_000_k_ArrayList(ArrayListDataProvider100m prov, Blackhole bh) {
         final List<Long> unsortedNewValues = prov.unsortedNewValues;
         final List<Long> listUnderTest = prov.sortedList;
         addNewValuesToList(unsortedNewValues, listUnderTest);
@@ -149,14 +115,14 @@ public class JmhFrankenListInsertBenchmark {
     }
 
     @State(Scope.Benchmark)
-    public static class FrankenDataProvider125k {
+    public static class FrankenDataProvider100k {
 
         List<Long> sortedList;
         List<Long> unsortedNewValues;
 
         @Setup(Level.Invocation)
         public void init() {
-            final int max = 125000;
+            final int max = 100000;
             sortedList = new FrankenList<>();
             unsortedNewValues = new ArrayList<>();
             long current = 0;
@@ -172,17 +138,16 @@ public class JmhFrankenListInsertBenchmark {
         }
 
     }
-
     @State(Scope.Benchmark)
-    public static class LinkedListDataProvider125k {
+    public static class FrankenDataProvider100k_75 {
 
         List<Long> sortedList;
         List<Long> unsortedNewValues;
 
         @Setup(Level.Invocation)
         public void init() {
-            final int max = 125000;
-            sortedList = new LinkedList<>();
+            final int max = 100000;
+            sortedList = new FrankenList<>(75);
             unsortedNewValues = new ArrayList<>();
             long current = 0;
             Random r = new Random(100);
@@ -198,15 +163,16 @@ public class JmhFrankenListInsertBenchmark {
 
     }
 
+
     @State(Scope.Benchmark)
-    public static class ArrayListDataProvider125k {
+    public static class ArrayListDataProvider100k {
 
         List<Long> sortedList;
         List<Long> unsortedNewValues;
 
         @Setup(Level.Invocation)
         public void init() {
-            final int max = 125000;
+            final int max = 100000;
             sortedList = new ArrayList<>();
             unsortedNewValues = new ArrayList<>();
             long current = 0;
@@ -223,15 +189,16 @@ public class JmhFrankenListInsertBenchmark {
 
     }
 
+
     @State(Scope.Benchmark)
-    public static class FrankenDataProvider250k {
+    public static class FrankenDataProvider1000k {
 
         List<Long> sortedList;
         List<Long> unsortedNewValues;
 
         @Setup(Level.Invocation)
         public void init() {
-            final int max = 250000;
+            final int max = 1_000_000;
             sortedList = new FrankenList<>();
             unsortedNewValues = new ArrayList<>();
             long current = 0;
@@ -249,114 +216,14 @@ public class JmhFrankenListInsertBenchmark {
     }
 
     @State(Scope.Benchmark)
-    public static class LinkedListDataProvider250k {
+    public static class ArrayListDataProvider1000k {
 
         List<Long> sortedList;
         List<Long> unsortedNewValues;
 
         @Setup(Level.Invocation)
         public void init() {
-            final int max = 250000;
-            sortedList = new LinkedList<>();
-            unsortedNewValues = new ArrayList<>();
-            long current = 0;
-            Random r = new Random(100);
-            for (int i = 0; i < max; i++) {
-                current += r.nextInt(10);
-                sortedList.add(current);
-            }
-
-            for (int i = 0; i < 10; i++) {
-                unsortedNewValues.add((long) r.nextInt(max));
-            }
-        }
-
-    }
-
-    @State(Scope.Benchmark)
-    public static class ArrayListDataProvider250k {
-
-        List<Long> sortedList;
-        List<Long> unsortedNewValues;
-
-        @Setup(Level.Invocation)
-        public void init() {
-            final int max = 250000;
-            sortedList = new ArrayList<>();
-            unsortedNewValues = new ArrayList<>();
-            long current = 0;
-            Random r = new Random(100);
-            for (int i = 0; i < max; i++) {
-                current += r.nextInt(10);
-                sortedList.add(current);
-            }
-
-            for (int i = 0; i < 10; i++) {
-                unsortedNewValues.add((long) r.nextInt(max));
-            }
-        }
-
-    }
-
-    @State(Scope.Benchmark)
-    public static class FrankenDataProvider500k {
-
-        List<Long> sortedList;
-        List<Long> unsortedNewValues;
-
-        @Setup(Level.Invocation)
-        public void init() {
-            final int max = 500000;
-            sortedList = new FrankenList<>();
-            unsortedNewValues = new ArrayList<>();
-            long current = 0;
-            Random r = new Random(100);
-            for (int i = 0; i < max; i++) {
-                current += r.nextInt(10);
-                sortedList.add(current);
-            }
-
-            for (int i = 0; i < 10; i++) {
-                unsortedNewValues.add((long) r.nextInt(max));
-            }
-        }
-
-    }
-
-    @State(Scope.Benchmark)
-    public static class LinkedListDataProvider500k {
-
-        List<Long> sortedList;
-        List<Long> unsortedNewValues;
-
-        @Setup(Level.Invocation)
-        public void init() {
-            final int max = 500000;
-            sortedList = new LinkedList<>();
-            unsortedNewValues = new ArrayList<>();
-            long current = 0;
-            Random r = new Random(100);
-            for (int i = 0; i < max; i++) {
-                current += r.nextInt(10);
-                sortedList.add(current);
-            }
-
-            for (int i = 0; i < 10; i++) {
-                unsortedNewValues.add((long) r.nextInt(max));
-            }
-        }
-
-    }
-
-    @State(Scope.Benchmark)
-    public static class ArrayListDataProvider500k {
-
-        List<Long> sortedList;
-        List<Long> unsortedNewValues;
-
-        @Setup(Level.Invocation)
-        public void init() {
-            final int max = 500000;
+            final int max = 1_000_000;
             sortedList = new ArrayList<>();
             unsortedNewValues = new ArrayList<>();
             long current = 0;
@@ -398,30 +265,7 @@ public class JmhFrankenListInsertBenchmark {
 
     }
 
-    @State(Scope.Benchmark)
-    public static class LinkedListDataProvider {
 
-        List<Long> sortedList;
-        List<Long> unsortedNewValues;
-
-        @Setup(Level.Invocation)
-        public void init() {
-            final int max = 1000000;
-            sortedList = new LinkedList<>();
-            unsortedNewValues = new ArrayList<>();
-            long current = 0;
-            Random r = new Random(100);
-            for (int i = 0; i < max; i++) {
-                current += r.nextInt(10);
-                sortedList.add(current);
-            }
-
-            for (int i = 0; i < 10; i++) {
-                unsortedNewValues.add((long) r.nextInt(max));
-            }
-        }
-
-    }
 
     @State(Scope.Benchmark)
     public static class ArrayListDataProvider {
@@ -473,8 +317,10 @@ public class JmhFrankenListInsertBenchmark {
 
     }
 
+
+
     @State(Scope.Benchmark)
-    public static class LinkedListDataProvider10m {
+    public static class ArrayListDataProvider10m {
 
         List<Long> sortedList;
         List<Long> unsortedNewValues;
@@ -482,7 +328,7 @@ public class JmhFrankenListInsertBenchmark {
         @Setup(Level.Invocation)
         public void init() {
             final int max = 10_000_000;
-            sortedList = new LinkedList<>();
+            sortedList = new ArrayList<>();
             unsortedNewValues = new ArrayList<>();
             long current = 0;
             Random r = new Random(100);
@@ -498,15 +344,68 @@ public class JmhFrankenListInsertBenchmark {
 
     }
 
+
     @State(Scope.Benchmark)
-    public static class ArrayListDataProvider10m {
+    public static class FrankenDataProvider100m {
 
         List<Long> sortedList;
         List<Long> unsortedNewValues;
 
         @Setup(Level.Invocation)
         public void init() {
-            final int max = 10_000_000;
+            final int max = 100_000_000;
+            sortedList = new FrankenList<>();
+            unsortedNewValues = new ArrayList<>();
+            long current = 0;
+            Random r = new Random(100);
+            for (int i = 0; i < max; i++) {
+                current += r.nextInt(10);
+                sortedList.add(current);
+            }
+
+            for (int i = 0; i < 10; i++) {
+                unsortedNewValues.add((long) r.nextInt(max));
+            }
+        }
+
+    }
+
+
+    @State(Scope.Benchmark)
+    public static class FrankenDataProvider100m_75 {
+
+        List<Long> sortedList;
+        List<Long> unsortedNewValues;
+
+        @Setup(Level.Invocation)
+        public void init() {
+            final int max = 100_000_000;
+            sortedList = new FrankenList<>(7500);
+            unsortedNewValues = new ArrayList<>();
+            long current = 0;
+            Random r = new Random(100);
+            for (int i = 0; i < max; i++) {
+                current += r.nextInt(10);
+                sortedList.add(current);
+            }
+
+            for (int i = 0; i < 10; i++) {
+                unsortedNewValues.add((long) r.nextInt(max));
+            }
+        }
+
+    }
+
+
+    @State(Scope.Benchmark)
+    public static class ArrayListDataProvider100m {
+
+        List<Long> sortedList;
+        List<Long> unsortedNewValues;
+
+        @Setup(Level.Invocation)
+        public void init() {
+            final int max = 100_000_000;
             sortedList = new ArrayList<>();
             unsortedNewValues = new ArrayList<>();
             long current = 0;

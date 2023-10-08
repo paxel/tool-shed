@@ -98,11 +98,8 @@ FrankenList has nearly random access:
 ## Benchmarks
 
 ### Insert multiple values in a list
-The benchmark added 10 random numbers into the sorted list of the given number of elements.
-The result shows that ArrayList is incredibly fast for amounts of entries at least up to 125k.
-But at 250k already FrankenList is faster, and at 500k more than double the speed of an ArrayList.
-At a million entries, the FrankenList is 5 times faster than an ArrayList.
-At 10 million entries, it's 26 times faster
+The benchmark adds 10 random numbers into the sorted list of the given number of elements.
+The Frankenlist has a bucket size of 750 (except if marked differently) 
 
 **Benchmarked code:**
 ```java
@@ -116,113 +113,27 @@ for (Long long1 : unsortedNewValues) { // 10 random values
 }
 ```
 
-**Result:**
-| size       | Franken   | Linked  | Array        |
-|------------|-----------|---------|--------------|
-| 125.000    | 4925      | 139     | **8822**     |
-| 250.000    | **4567**  | 59      | 3948         |
-| 500.000    | **3523**  | 29      | 1205         |
-| 1.000.000  | **2988**  | 13      | 682          |
-| 10.000.000 | **429**   | 0       | 16           |
-
-The number is operations per second.
-The operation is adding 10 different numbers into the list.
-The numbers are guaranteed to be greater than the first and less than the last element in the list.
-
-
-### Sorting an unsorted list
-Sorting an unsorted List is not very effective and should be avoided
-
-**Benchmarked code:**
-```java
-Collections.sort(unsortedNewValues);
-```
-
-**Result:**
-| size       | Franken       | Linked  | Array    |
-|------------|---------------|---------|----------|
-| 500.000    |  1            | 3       | **4**    |
-| 1.000.000  |  0            | 1       | **1**    |
-| 10.000.000 |  0            | 0       | **0**    |
-
-Because the Sort is using TimSort that is running on an array, ArrayList is unbeatable here.
-The FrankenList has to copy all the LinkedLists to an Array and afterwards the sorted array back into the FrankenList.
-
-
-### Searching an entry and use a ListFilter to manipulate the environment
-The main use-case what the FrankenList was designed for was being used with a ListIterator
-to manipulate some values at a given position. e.g finding an entry, examining the surrounding entries and
-eventually remove, replace and/or insert an entry.
-
-**Benchmarked code:**
-```java
-int index = unsortedNewValues.get(0).intValue();
-ListIterator<Long> listIterator = listUnderTest.listIterator(index);
-Iterator<Long> iterator = unsortedNewValues.iterator();
-while (iterator.hasNext()) {// 10 random values
-    if (listIterator.hasNext()) {
-        listIterator.next();
-    } else {
-        listIterator.previous();
-    }
-    listIterator.remove();
-    listIterator.add(iterator.next());
-}
-```
-
-**Result:**
-| size       | Franken    | Linked  | Array |
-|------------|------------|---------|-------|
-| 125.000    | **74973**  | 13422   | 25952 |
-| 250.000    | **47378**  |  1731   |  2128 |
-| 500.000    | **23597**  |  1375   |   793 |
-| 1.000.000  | **12921**  |   501   |   531 |
-| 10.000.000 |   **718**  |    33   |    17 |
-
-Even in situations where the ArrayList was faster before, it is slower in this
-scenario.
-It must be said, that the ListIterator here is not optimized.
-A dedicated FrankenListIterator will improve this value additionally.
-
 # Overall Benchmark results
 ```
-Benchmark                                                                  (entries)   Mode  Cnt       Score       Error  Units
-p.lib.JmhFrankenListInsertBenchmark.addToArrayListWith_a_125k_Entries            N/A  thrpt   25    9180.892 ±    20.040  ops/s
-p.lib.JmhFrankenListInsertBenchmark.addToArrayListWith_a_250k_Entries            N/A  thrpt   25    5944.973 ±    29.631  ops/s
-p.lib.JmhFrankenListInsertBenchmark.addToArrayListWith_a_500k_Entries            N/A  thrpt   25     561.069 ±    21.827  ops/s
-p.lib.JmhFrankenListInsertBenchmark.addToArrayListWith_b_1m_Entries              N/A  thrpt   25     368.572 ±    27.282  ops/s
-p.lib.JmhFrankenListInsertBenchmark.addToArrayListWith_c_10m_Entries             N/A  thrpt   25      11.290 ±     1.563  ops/s
-p.lib.JmhFrankenListInsertBenchmark.addToFrankenListWith_a_125k_Entries          N/A  thrpt   25    4676.405 ±    24.237  ops/s
-p.lib.JmhFrankenListInsertBenchmark.addToFrankenListWith_a_250k_Entries          N/A  thrpt   25    4445.311 ±    11.150  ops/s
-p.lib.JmhFrankenListInsertBenchmark.addToFrankenListWith_a_500k_Entries          N/A  thrpt   25    3325.115 ±     9.251  ops/s
-p.lib.JmhFrankenListInsertBenchmark.addToFrankenListWith_b_1m_Entries            N/A  thrpt   25    2840.254 ±    39.343  ops/s
-p.lib.JmhFrankenListInsertBenchmark.addToFrankenListWith_c_10m_Entries           N/A  thrpt   25     479.949 ±    21.255  ops/s
-p.lib.JmhFrankenListInsertBenchmark.addToLinkedListWith_a_125k_Entries           N/A  thrpt   25     141.131 ±     0.601  ops/s
-p.lib.JmhFrankenListInsertBenchmark.addToLinkedListWith_a_250k_Entries           N/A  thrpt   25      59.416 ±     0.661  ops/s
-p.lib.JmhFrankenListInsertBenchmark.addToLinkedListWith_a_500k_Entries           N/A  thrpt   25      28.828 ±     0.336  ops/s
-p.lib.JmhFrankenListInsertBenchmark.addToLinkedListWith_b_1m_Entries             N/A  thrpt   25      13.417 ±     0.144  ops/s
-p.lib.JmhFrankenListInsertBenchmark.addToLinkedListWith_c_10m_Entries            N/A  thrpt   25       0.605 ±     0.025  ops/s
-p.lib.JmhFrankenListIteratorBenchmark.addToArrayListWith_a_125k_Entries          N/A  thrpt   25   28237.782 ±   127.130  ops/s
-p.lib.JmhFrankenListIteratorBenchmark.addToArrayListWith_a_250k_Entries          N/A  thrpt   25    2663.535 ±     5.597  ops/s
-p.lib.JmhFrankenListIteratorBenchmark.addToArrayListWith_a_500k_Entries          N/A  thrpt   25     420.878 ±    15.698  ops/s
-p.lib.JmhFrankenListIteratorBenchmark.addToArrayListWith_b_1m_Entries            N/A  thrpt   25     360.822 ±    28.025  ops/s
-p.lib.JmhFrankenListIteratorBenchmark.addToArrayListWith_c_10m_Entries           N/A  thrpt   25      14.015 ±     2.744  ops/s
-p.lib.JmhFrankenListIteratorBenchmark.addToFrankenListWith_a_125k_Entries        N/A  thrpt   25   76074.948 ±   373.469  ops/s
-p.lib.JmhFrankenListIteratorBenchmark.addToFrankenListWith_a_250k_Entries        N/A  thrpt   25   50755.875 ±   235.302  ops/s
-p.lib.JmhFrankenListIteratorBenchmark.addToFrankenListWith_a_500k_Entries        N/A  thrpt   25   24579.686 ±   174.601  ops/s
-p.lib.JmhFrankenListIteratorBenchmark.addToFrankenListWith_b_1m_Entries          N/A  thrpt   25   13664.496 ±    81.021  ops/s
-p.lib.JmhFrankenListIteratorBenchmark.addToFrankenListWith_c_10m_Entries         N/A  thrpt   25     737.245 ±     9.600  ops/s
-p.lib.JmhFrankenListIteratorBenchmark.addToLinkedListWith_a_125k_Entries         N/A  thrpt   25   13431.016 ±    36.679  ops/s
-p.lib.JmhFrankenListIteratorBenchmark.addToLinkedListWith_a_250k_Entries         N/A  thrpt   25    1697.580 ±     7.551  ops/s
-p.lib.JmhFrankenListIteratorBenchmark.addToLinkedListWith_a_500k_Entries         N/A  thrpt   25    1347.942 ±    11.165  ops/s
-p.lib.JmhFrankenListIteratorBenchmark.addToLinkedListWith_b_1m_Entries           N/A  thrpt   25     492.104 ±     2.465  ops/s
-p.lib.JmhFrankenListIteratorBenchmark.addToLinkedListWith_c_10m_Entries          N/A  thrpt   25      33.561 ±     2.832  ops/s
-p.lib.JmhFrankenListSortBenchmark.sortArrayListWith_a_500k_Entries               N/A  thrpt   25       4.317 ±     0.030  ops/s
-p.lib.JmhFrankenListSortBenchmark.sortArrayListWith_b_1m_Entries                 N/A  thrpt   25       1.890 ±     0.015  ops/s
-p.lib.JmhFrankenListSortBenchmark.sortArrayListWith_c_10m_Entries                N/A  thrpt   25       0.123 ±     0.002  ops/s
-p.lib.JmhFrankenListSortBenchmark.sortFrankenListWith_a_500k_Entries             N/A  thrpt   25       2.087 ±     0.006  ops/s
-p.lib.JmhFrankenListSortBenchmark.sortFrankenListWith_b_1m_Entries               N/A  thrpt   25       0.918 ±     0.007  ops/s
-p.lib.JmhFrankenListSortBenchmark.sortFrankenListWith_c_10m_Entries              N/A  thrpt   25       0.072 ±     0.001  ops/s
-p.lib.JmhFrankenListSortBenchmark.sortLinkedListWith_a_500k_Entries              N/A  thrpt   25       4.026 ±     0.018  ops/s
-p.lib.JmhFrankenListSortBenchmark.sortLinkedListWith_b_1m_Entries                N/A  thrpt   25       1.594 ±     0.034  ops/s
-p.lib.JmhFrankenListSortBenchmark.sortLinkedListWith_c_10m_Entries               N/A  thrpt   25       0.100 ±     0.005  ops/s```
+JmhFrankenListInsertBenchmark.addTo__100_000_k_ArrayList            thrpt           0.238          ops/s
+JmhFrankenListInsertBenchmark.addTo__100_000_k_FrankenList          thrpt          15.352          ops/s
+JmhFrankenListInsertBenchmark.addTo__100_000_k_FrankenList_7500     thrpt          38.935          ops/s
+
+JmhFrankenListInsertBenchmark.addTo___10_000_k_ArrayList            thrpt          18.533          ops/s
+JmhFrankenListInsertBenchmark.addTo___10_000_k_FrankenList          thrpt         486.693          ops/s
+
+JmhFrankenListInsertBenchmark.addTo____1_000_k_ArrayList            thrpt         844.837          ops/s
+JmhFrankenListInsertBenchmark.addTo____1_000_k_FrankenList          thrpt        2746.037          ops/s
+
+JmhFrankenListInsertBenchmark.addTo______100_k_ArrayList            thrpt       13066.907          ops/s
+JmhFrankenListInsertBenchmark.addTo______100_k_FrankenList_75       thrpt       15244.226          ops/s
+JmhFrankenListInsertBenchmark.addTo______100_k_FrankenList_default  thrpt        7210.971          ops/s
+```
+
+The benchmark shows, that for very full lists (100 million entries) the **Frankenlist** in default settings is ~70 times faster than an ArrayList.
+If the bucket size is increased from 750 to 7500, the **Frankenlist** is ~180 times faster.
+
+For less filled lists (100.000 entries) The **Arraylist** is two times faster than the Frankenlist with default settings.
+If the buckt size is decreased from 750 to 75, the **Frankenlist** is slightly faster than the Arraylist.
+
+
