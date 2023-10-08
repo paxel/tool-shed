@@ -57,4 +57,17 @@ public class ExecutorCompletionService {
         ex.submit(new RunnableCompleter(task, completableFuture));
         return completableFuture;
     }
+
+    public <T> CompletableFuture<T> submitExecutable(UnstableExecutable task, T result) {
+        CompletableFuture<Void> completableFuture = new CompletableFuture<>();
+        ex.submit(new UnstableExecutableCompleter(task, completableFuture));
+        // if successful, change the result
+        return completableFuture.thenApply(f -> result);
+    }
+
+    public CompletableFuture<Void> submitExecutable(UnstableExecutable task) {
+        CompletableFuture<Void> completableFuture = new CompletableFuture<>();
+        ex.submit(new UnstableExecutableCompleter(task, completableFuture));
+        return completableFuture;
+    }
 }

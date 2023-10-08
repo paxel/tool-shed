@@ -1,6 +1,8 @@
 package paxel.lib;
 
 import java.util.Objects;
+import java.util.concurrent.Callable;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -13,13 +15,124 @@ import java.util.function.Supplier;
 
 public record Result<V, E>(V value, E error, ResultStatus status) {
 
-    public static <V, E> Result<V, E> ok(V value) {
+    /**
+     * Creates a successful Result with a value.
+     *
+     * @param value The successful value.
+     * @return The new Result.
+     */
+    public static <U, X> Result<U, X> ok(U value) {
         return new Result<>(value, null, ResultStatus.SUCCESS);
     }
 
-    public static <V, E> Result<V, E> err(E error) {
+    /**
+     * Creates a failed result with an error.
+     *
+     * @param error The error value.
+     * @return The new Result.
+     */
+    public static <U, X> Result<U, X> err(X error) {
         return new Result<>(null, error, ResultStatus.FAIL);
     }
+
+    /**
+     * Executes a {@link Callable} and creates a Result from the return value.
+     * In case the Callable throws an {@link Exception}, the Result will contain it as error.
+     *
+     * @param callable the process to be executed.
+     * @return the result of the process.
+     */
+    public static <U, X extends Exception> Result<U, X> from(Callable<U> callable) {
+        try {
+            return new Result<>(callable.call(), null, ResultStatus.SUCCESS);
+        } catch (Exception e) {
+            return new Result<>(null, (X) e, ResultStatus.FAIL);
+        }
+    }
+
+    /**
+     * Queries a {@link Supplier} and creates a Result from the return value.
+     * In case the Supplier throws an {@link Exception}, the Result will contain it as error.
+     *
+     * @param supplier the Supplier to be queried.
+     * @return the result of the process.
+     */
+    public static <U, X extends RuntimeException> Result<U, X> from(Supplier<U> supplier) {
+        try {
+            return new Result<>(supplier.get(), null, ResultStatus.SUCCESS);
+        } catch (RuntimeException e) {
+            return new Result<>(null, (X) e, ResultStatus.FAIL);
+        }
+    }
+
+    /**
+     * Queries an {@link UnstableExecutable} and creates a Result from the given fallback value.
+     * In case the executable throws an {@link Exception}, the Result will contain it as error.
+     *
+     * @param executable the Executable to be queried.
+     * @param fallback   The Result value
+     * @return the result of the process.
+     */
+    public static <U, X extends Exception> Result<U, X> fromExecutableOrElse(UnstableExecutable executable, U fallback) {
+        try {
+            executable.execute();
+            return new Result<>(fallback, null, ResultStatus.SUCCESS);
+        } catch (Exception e) {
+            return new Result<>(null, (X) e, ResultStatus.FAIL);
+        }
+    }
+
+    /**
+     * Queries an {@link UnstableExecutable} and creates a Result from the given fallback supplier.
+     * In case the executable throws an {@link Exception}, the Result will contain it as error.
+     *
+     * @param executable       the Executable to be queried.
+     * @param fallbackSupplier The Result value provider
+     * @return the result of the process.
+     */
+    public static <U, X extends Exception> Result<U, X> fromExecutableOrElse(UnstableExecutable executable, Supplier<U> fallbackSupplier) {
+        try {
+            executable.execute();
+            return new Result<>(fallbackSupplier.get(), null, ResultStatus.SUCCESS);
+        } catch (Exception e) {
+            return new Result<>(null, (X) e, ResultStatus.FAIL);
+        }
+    }
+
+    /**
+     * Queries an {@link UnstableExecutable} and creates a Void Result.
+     * In case the executable throws an {@link Exception}, the Result will contain it as error.
+     *
+     * @param executable the Executable to be queried.
+     * @return the result of the process.
+     */
+    public static <X extends Exception> Result<Void, X> fromExecutable(UnstableExecutable executable) {
+        try {
+            executable.execute();
+            return new Result<>(null, null, ResultStatus.SUCCESS);
+        } catch (Exception e) {
+            return new Result<>(null, (X) e, ResultStatus.FAIL);
+        }
+    }
+
+    /**
+     * Queries an {@link Runnable} and creates a Void Result.
+     * In case the runnable throws a {@link RuntimeException}, the Result will contain it as error.
+     *
+     * @param runnable the Runnable to be queried.
+     * @return the result of the process.
+     */
+    public static <X extends RuntimeException> Result<Void, X> from(Runnable runnable) {
+        try {
+            runnable.run();
+            return new Result<>(null, null, ResultStatus.SUCCESS);
+        } catch (RuntimeException e) {
+            return new Result<>(null, (X) e, ResultStatus.FAIL);
+        }
+    }
+
+
+
 
     public boolean isSuccess() {
         return status.isSuccess();
@@ -29,6 +142,11 @@ public record Result<V, E>(V value, E error, ResultStatus status) {
         return !status.isSuccess();
     }
 
+    /**
+     * Retrieves the Result if successful. Otherwise, a ResultException is thrown.
+     *
+     * @return the Value
+     */
     @Override
     public V value() {
         return switch (status) {
@@ -37,6 +155,11 @@ public record Result<V, E>(V value, E error, ResultStatus status) {
         };
     }
 
+    /**
+     * Retrieves the Result if successful. Otherwise, the fallback is returned.
+     *
+     * @return the Value.
+     */
     public V getValueOr(V fallBack) {
         return switch (status) {
             case SUCCESS -> value;
@@ -44,6 +167,11 @@ public record Result<V, E>(V value, E error, ResultStatus status) {
         };
     }
 
+    /**
+     * Retrieves the Result if successful. Otherwise, the result of the Supplier is returned.
+     *
+     * @return the Value.
+     */
     public V getValueOrGet(Supplier<V> fallBack) {
         return switch (status) {
             case SUCCESS -> value;
@@ -51,6 +179,24 @@ public record Result<V, E>(V value, E error, ResultStatus status) {
         };
     }
 
+    /**
+     * Returns a new Result.
+     * The given function is called with value and error. Both might be null.
+     * The result of the given function is returned as new Result.
+     *
+     * @return the Value.
+     */
+    public <U, X> Result<U, X> map(BiFunction<V, E, Result<U, X>> mapper) {
+        return mapper.apply(value, error);
+    }
+
+    /**
+     * Returns a new Result.
+     * If this result is successful, the new Result will contain the value provided by the valueMapper Function.
+     * If this result has failed, the new Result will contain the value provided by the errorMapper Function.
+     *
+     * @return the Value.
+     */
     public <U, X> Result<U, X> map(Function<V, U> valueMapper, Function<E, X> errorMapper) {
         return switch (status) {
             case SUCCESS -> Result.ok(valueMapper.apply(value));
@@ -62,7 +208,7 @@ public record Result<V, E>(V value, E error, ResultStatus status) {
         return switch (status) {
             case SUCCESS -> Result.ok(valueMapper.apply(value));
             default ->
-                    throw new IllegalStateException(String.format("Can't map the value of a failed Result. Error was %s", verboseError()));
+                    throw new ResultException(String.format("Can't map the value of a failed Result. Error was %s", verboseError()));
         };
     }
 
@@ -84,7 +230,7 @@ public record Result<V, E>(V value, E error, ResultStatus status) {
         return switch (status) {
             case FAIL -> Result.err(errorMapper.apply(error));
             default ->
-                    throw new IllegalStateException(String.format("Can't map the error of a successful Result. Value was %s", verboseValue()));
+                    throw new ResultException(String.format("Can't map the error of a successful Result. Value was %s", verboseValue()));
         };
     }
 
