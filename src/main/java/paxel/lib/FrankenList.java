@@ -97,11 +97,27 @@ public class FrankenList<E> extends AbstractList<E> implements RandomAccess {
         modCount++;
     }
 
+    /**
+     * Replaces the element at the specified index with the given value.
+     *
+     * @param index the index of the element to replace
+     * @param value the element to be stored at the specified position
+     * @return the element previously at the specified index
+     * @throws IndexOutOfBoundsException if the index is out of range (index < 0 || index >= size())
+     */
     @Override
     public E set(int index, E value) {
         return data.set(index, value);
     }
 
+    /**
+     * Sorts the elements of the list using the specified comparator.
+     *
+     * @param c the {@code Comparator} used to compare list elements.
+     *          A {@code null} value indicates that the elements'
+     *          {@linkplain Comparable natural ordering} should be used.
+     * @throws ConcurrentModificationException if the list is modified while sorting.
+     */
     @Override
     public void sort(Comparator<? super E> c) {
         int expected = super.modCount;
@@ -237,7 +253,7 @@ public class FrankenList<E> extends AbstractList<E> implements RandomAccess {
                 sections.add(section);
                 section.values.add(value);
             } else {
-                LinkedListSection<F> last = sections.get(sections.size() - 1);
+                LinkedListSection<F> last = sections.getLast();
                 if (last.values.size() < sectionSizeLimit) {
                     last.values.add(value);
                 } else {

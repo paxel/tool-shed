@@ -138,7 +138,7 @@ public class JmhFrankenListIteratorBenchmark {
     }
 
     private void addNewValuesToList(final List<Long> unsortedNewValues, final List<Long> listUnderTest) {
-        int index = unsortedNewValues.get(0).intValue();
+        int index = unsortedNewValues.getFirst().intValue();
         ListIterator<Long> listIterator = listUnderTest.listIterator(index);
         for (Long unsortedNewValue : unsortedNewValues) {
             if (listIterator.hasNext()) {

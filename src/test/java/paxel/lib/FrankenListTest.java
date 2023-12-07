@@ -28,7 +28,7 @@ public class FrankenListTest {
 
         fl.sort(null);
 
-        long current = fl.get(0);
+        long current = fl.getFirst();
         for (int i = 1; i < fl.size(); i++) {
             Long next = fl.get(i);
             if (next < current) {
@@ -60,7 +60,7 @@ public class FrankenListTest {
         final int max = 10_000;
         for (int i = 0; i < max; i++) {
             // all values are inserted add 0, pushing existing data down
-            fl.add(0, (long) i);
+            fl.addFirst((long) i);
         }
 
         for (int i = 0; i < fl.size(); i++) {
@@ -90,7 +90,7 @@ public class FrankenListTest {
             assertThat(fl, contains(comp.toArray()));
         }
 
-        fl.remove(0);
+        fl.removeFirst();
 
         assertThat(fl.isEmpty(), is(true));
     }
